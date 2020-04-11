@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django_celery_beat',
 ]
 
 MIDDLEWARE = [
@@ -83,6 +84,17 @@ DATABASES = {
         'HOST': 'localhost',
         'PORT': '5432',
     }
+}
+
+# Celery
+
+CELERY_BROKER_URL = 'amqp://'   
+CELERY_TIMEZONE = 'GMT'
+CELERY_BEAT_SCHEDULE = {
+    'check-covid_data_every-two-hours': {
+        'task': 'plots.tasks.update_borough_database',
+        'schedule': 30.0,
+    },
 }
 
 # Password validation
