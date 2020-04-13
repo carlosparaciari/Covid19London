@@ -6,3 +6,5 @@ class Borough(models.Model):
     population = models.IntegerField(default=0)
     cumulative_array = ArrayField(models.IntegerField())
 
+    def __str__(self):
+        return self.name

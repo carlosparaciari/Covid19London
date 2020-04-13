@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django_celery_beat',
+    'django_celery_results',
 ]
 
 MIDDLEWARE = [
@@ -93,9 +94,12 @@ CELERY_TIMEZONE = 'GMT'
 CELERY_BEAT_SCHEDULE = {
     'check-covid_data_every-two-hours': {
         'task': 'plots.tasks.update_borough_database',
-        'schedule': 30.0,
+        'schedule': 7200.0,
     },
 }
+CELERY_RESULT_BACKEND='django-db'
+CELERY_CACHE_BACKEND = 'django-cache'
+
 
 # Password validation
 # https://docs.djangoproject.com/en/3.0/ref/settings/#auth-password-validators
