@@ -3,10 +3,15 @@
 COVID_DATA_URL = 'https://fingertips.phe.org.uk/documents/Historic%20COVID-19%20Dashboard%20Data.xlsx'
 
 LOCAL_AREA_SHEET = 5
+REGIONS_SHEET = 4
+
 AREA_NAME_COL = 1
 DATA_STARTING_COL = 2
 
 BOROUGH_ROWS = range(100,132)
+LONDON_ROW = 9
+TIME_ROW = 7
+
 POPULATIONS_DIC = {
     "Barking and Dagenham":211998,
     "Barnet":392140,
