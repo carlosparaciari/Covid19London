@@ -30,7 +30,7 @@ def update_borough_database():
             pop = POPULATIONS_DIC[area]
             b = Borough(name=area,population=pop, cumulative_array=cases)
 
-            b.save()
+        b.save()
 
     # Add London to the database
     london_sheet = workbook.sheet_by_index(REGIONS_SHEET)
@@ -58,5 +58,5 @@ def update_borough_database():
         d.dates_array = dates_str
     except Dates.DoesNotExist:
         d = Dates(dates_array=dates_str)
-    
+
     d.save()
