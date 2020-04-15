@@ -1,0 +1,24 @@
+{% load static %}
+
+<link rel="stylesheet" type="text/css" href="{% static 'plots/style.css' %}">
+
+<!DOCTYPE html>
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+  <h2>Cumulative cases in London boroughs</h2>
+  <p>Here we give some info about the data (where do they come from, etc.).</p>
+  <div class="dropdown">
+  	<button class="dropbtn">{{ current }}</button>
+  		<div class="dropdown-content">
+  			{% for entry in items %}
+  					<a href="{% url 'plots:cumulative_single' entry %}">{{ entry }}</a>
+  			{% endfor %}
+  		</div>
+  </div>
+  <div style="margin:0 auto;text-align:center">
+  	<img src="data:image/png;base64,{{ data }}" alt="" height="550" , width="750">
+  </div>
+</body>
