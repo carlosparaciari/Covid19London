@@ -5,5 +5,6 @@ from . import views
 app_name = 'plots'
 urlpatterns = [
 	path('', views.index, name='index'),
-	path('<borough_name>/', views.cumul_abs, name='cumulative_single'),
+	path('abs/<borough_name>/', views.cumul_abs, name='cumulative_single'),
+	path('rel/<borough_list>/', views.cumul_rel, name='cumulative_multiple'),
 ]
