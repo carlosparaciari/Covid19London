@@ -6,5 +6,5 @@ app_name = 'plots'
 urlpatterns = [
 	path('', views.index, name='index'),
 	path('abs/<borough_name>/', views.cumul_abs, name='cumulative_single'),
-	path('rel/<borough_list>/', views.cumul_rel, name='cumulative_multiple'),
+	path('rel/', views.cumul_rel, name='cumulative_multiple'),
 ]

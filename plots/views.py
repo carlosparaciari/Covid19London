@@ -3,7 +3,7 @@ from django.shortcuts import render, get_object_or_404
 from django.urls import reverse
 import io
 import urllib, base64
-from .plots_lib import increments, cumulative_plot_abs
+from .plots_lib import increments, relative_cases_array, cumulative_plot_abs, cumulative_plot_rel, prepare_checklist_boroughs
 from .models import Borough, Dates
 
 def index(request):
@@ -29,11 +29,6 @@ def cumul_abs(request,borough_name):
 	daily_increment = b_increments[-1]
 	daily_percentage = "{:.1f}".format(100*daily_increment/(daily_total-daily_increment))
 
-	# Prepare the list of the three most affected borough
-	affected_boroughs = [(name,cases[-1]) for name,cases in Borough.objects.values_list('name','cumulative_array')]
-	most_affected_boroughs = sorted(affected_boroughs, key=lambda tup: tup[1],reverse = True)
-	main_boroughs = '+'.join([str(most_affected_boroughs[i][0]) for i in range(1,4)])
-
 	# Plot of cumulative cases
 	cumul_abs = cumulative_plot_abs(d.dates_array, b.cumulative_array, b_increments, b.name)
 
@@ -51,12 +46,59 @@ def cumul_abs(request,borough_name):
 			   'date':last_update,
 			   'daily_tot':daily_total,
 			   'daily_inc':daily_increment,
-			   'daily_per':daily_percentage,
-			   'blist':main_boroughs
+			   'daily_per':daily_percentage
 			  }
 	
 	return render(request, 'plots/cumulative_abs.html', context)
 
-def cumul_rel(request,borough_list):
+def cumul_rel(request):
 
-	return HttpResponse('Dummy page for the relative plots!')
+	# Prepare list of borough to be plotted
+	if request.method == 'POST':
+		response_post = request.POST
+		response_dict = response_post.dict()
+
+		borough_names = Borough.objects.values_list('name',flat=True)
+		borough_names = borough_names.exclude(name='London')
+		checkbox_items = [(name, name in response_dict) for name in borough_names]
+	else:
+		queryset_name_cases = Borough.objects.values_list('name','cumulative_array')
+		queryset_name_cases = queryset_name_cases.exclude(name='London')
+		checkbox_items = prepare_checklist_boroughs(queryset_name_cases)
+
+	# Collect data on the selected boroughs
+	select_boroughs = lambda tup : tup[1]
+	selected_boroughs = filter(select_boroughs,checkbox_items)
+
+	cases_rel_list = []
+	area_list = []
+	for borough_name,_ in selected_boroughs:
+		b = Borough.objects.get(name__exact=borough_name)
+		cases_rel_list.append(relative_cases_array(b.cumulative_array, b.population))
+		area_list.append(borough_name)
+
+	# Collect data on London
+	l = Borough.objects.get(name__exact='London')
+	cases_rel_lon = relative_cases_array(l.cumulative_array, l.population)
+
+	# Collect date array
+	d = Dates.objects.get()
+
+	# Get the date of the latest update
+	last_update = (d.dates_array)[-1]
+
+	cumul_rel = cumulative_plot_rel(d.dates_array,cases_rel_list,area_list,cases_rel_lon)
+
+	# Save plot into buffer and convert to be able to visualise it
+	buf = io.BytesIO()
+	cumul_rel.savefig(buf,format='png')
+	buf.seek(0)
+	string = base64.b64encode(buf.read())
+	uri = urllib.parse.quote(string)
+
+	context = {'data':uri,
+			   'items':checkbox_items,
+			   'date':last_update
+			  }
+
+	return render(request, 'plots/cumulative_rel.html', context)

@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<style>
+		#left_column {
+		  box-sizing: border-box;
+		  float: left;
+		  width: 15%;
+		  padding: 10px;
+		}
+
+		#right_column {
+		  box-sizing: border-box;
+		  float: left;
+		  width: 85%;
+		  padding: 10px;
+		  text-align:center;
+		}
+
+		.row:after {
+		  content: "";
+		  display: table;
+		  clear: both;
+		}
+
+		#submit_button {
+		  background-color: #1f77b4;
+		  color: white;
+		  width: 100%;
+		  padding: 10px;
+		  font-size: 16px;
+		  border: none;
+		  margin-top:10px;
+		}
+	</style>
+</head>
+<body>
+	<h2 style="font-family: Arial;">Comparison between cases in London boroughs</h2>
+	<p style="font-size:16px;font-family: Arial;">
+	    This page allows to compare the cumulative cases of Covid19 in different London boroughs.
+	    The number of cases are taken relative to 100.000 people; to normalise the cases the 2018
+	    census has been used, which provides an estimate of the boroughs' population.
+	    The data are collected from the governative website 
+	    <a href="https://coronavirus.data.gov.uk">https://coronavirus.data.gov.uk</a>.
+	    The data are updated to <b>{{ date }}</b>.
+	</p>
+	<div class="row">
+  		<div class="column" id="left_column">
+    		<form action="{% url 'plots:cumulative_multiple' %}" method="post">
+				<div style="font-size:14px;font-family: Arial;">
+					{% csrf_token %}
+					{% for entry in items %}
+					    <input type="checkbox" name="{{ entry.0 }}" value="compare" {% if entry.1 %}checked{% endif %}>
+					    <label for="{{ entry.0 }}">{{ entry.0 }}</label><br>
+					{% endfor %}
+					<input type="submit" value="Compare boroughs" id="submit_button">
+				</div>
+			</form>
+		</div>
+	 	<div class="column" id="right_column">
+			<img src="data:image/png;base64,{{ data }}" alt="" height="550" , width="750">
+		</div>
+	</div>
+	<p align="right" style="font-size:14px;font-family: Arial;">
+    	<a href="{% url 'plots:cumulative_single' 'London' %}">Absolute cumulative cases</a> &#x21E8;
+	</p>
+	<hr>
+	<p align="right" style="font-size:14px;font-family: Arial;">
+		This project was done using Django, and the source code can be found on
+		<a href="https://github.com/carlosparaciari">GitHub</a>.
+	</p>
+</body>
