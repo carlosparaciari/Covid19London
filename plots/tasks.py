@@ -1,12 +1,13 @@
 from __future__ import absolute_import, unicode_literals
 
 import pandas as pd
-import io
+import numpy as np
 import requests
+import io
 
 from celery import shared_task
 from .models import Borough, Dates
-from .plots_settings import COVID_DATA_URL, POPULATIONS_DIC
+from .plots_settings import COVID_DATA_URL, POPULATIONS_DIC, COLUMN_TO_READ
 
 @shared_task
 def update_borough_database():
@@ -15,9 +16,7 @@ def update_borough_database():
     download = requests.get(COVID_DATA_URL)
     decoded_content = download.content.decode('utf-8')
     full_data = pd.read_csv(io.StringIO(decoded_content))
-
-    column_to_read = ['Area name','Specimen date','Cumulative lab-confirmed cases']
-    data = full_data[column_to_read]
+    data = full_data[COLUMN_TO_READ]
 
     # Select the areas we are interested in
     borough_names = POPULATIONS_DIC.keys()
@@ -47,11 +46,19 @@ def update_borough_database():
 
     # Save the cumulative data into the database
     for area in borough_names:
+
+        # Get the data for the relevant borough
         relevant_rows = data['Area name'] == area
         borough_data = data.loc[relevant_rows]
+
+        # Get the increment of cases (now padded with 0's where no cases were reported)
         borough_data.index = pd.DatetimeIndex(borough_data['Specimen date'])
-        borough_data_pad = borough_data.reindex(idx,method='pad')
-        cases = list(borough_data_pad['Cumulative lab-confirmed cases'])
+        borough_data_pad = borough_data.reindex(idx,fill_value=0)
+        increments = np.array(borough_data_pad['Daily lab-confirmed cases'])
+        increments = np.nan_to_num(increments) # Replace nan entries with zero
+
+        # Compute the cumulative number of cases out of the increment array
+        cases = list(np.cumsum(increments).astype(int))
 
         try:
             b = Borough.objects.get(name__exact=area)

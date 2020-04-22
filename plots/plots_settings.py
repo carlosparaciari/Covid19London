@@ -2,6 +2,8 @@
 
 COVID_DATA_URL = "https://coronavirus.data.gov.uk/downloads/csv/coronavirus-cases_latest.csv"
 
+COLUMN_TO_READ = ['Area name','Specimen date','Daily lab-confirmed cases']
+
 POPULATIONS_DIC = {
     "Barking and Dagenham":211998,
     "Barnet":392140,
