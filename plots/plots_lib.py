@@ -1,16 +1,9 @@
 # Library for plot tasks and views
 
-import xlrd
-import datetime
 import matplotlib.pyplot as plt
 import numpy as np
 
 from math import floor
-
-def xldate_to_str(date,datemode):
-    datetime_obj = xlrd.xldate.xldate_as_datetime(date,datemode)
-    date_str = datetime_obj.strftime("%d-%b")
-    return date_str
 
 def increments(cases_array):
 	increment_array = np.insert(np.diff(cases_array), 0, cases_array[0])

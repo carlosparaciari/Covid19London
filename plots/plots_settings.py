@@ -1,16 +1,6 @@
 # Settings for Covid19London Plots app.
 
-COVID_DATA_URL = 'https://fingertips.phe.org.uk/documents/Historic%20COVID-19%20Dashboard%20Data.xlsx'
-
-LOCAL_AREA_SHEET = 5
-REGIONS_SHEET = 4
-
-AREA_NAME_COL = 1
-DATA_STARTING_COL = 2
-
-BOROUGH_ROWS = range(100,132)
-LONDON_ROW = 9
-TIME_ROW = 7
+COVID_DATA_URL = "https://coronavirus.data.gov.uk/downloads/csv/coronavirus-cases_latest.csv"
 
 POPULATIONS_DIC = {
     "Barking and Dagenham":211998,
@@ -23,7 +13,7 @@ POPULATIONS_DIC = {
     "Ealing":341982,
     "Enfield":333869,
     "Greenwich":286186,
-    "Hackney and City of London":279665,
+    "Hackney":279665,
     "Hammersmith and Fulham":185426,
     "Haringey":270624,
     "Harrow":250149,
@@ -44,5 +34,6 @@ POPULATIONS_DIC = {
     "Tower Hamlets":317705,
     "Waltham Forest":276700,
     "Wandsworth":326474,
-    "Westminster":255324
+    "Westminster":255324,
+    "London":8899375
 }

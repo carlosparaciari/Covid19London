@@ -1,27 +1,57 @@
 from __future__ import absolute_import, unicode_literals
 
+import pandas as pd
+import io
 import requests
-import xlrd
 
 from celery import shared_task
 from .models import Borough, Dates
-from .plots_lib import xldate_to_str
-from .plots_settings import COVID_DATA_URL, LOCAL_AREA_SHEET, REGIONS_SHEET, BOROUGH_ROWS, LONDON_ROW, AREA_NAME_COL, DATA_STARTING_COL, POPULATIONS_DIC, TIME_ROW
+from .plots_settings import COVID_DATA_URL, POPULATIONS_DIC
 
 @shared_task
 def update_borough_database():
 
-    # Request data from UK goverment
-    r = requests.get(COVID_DATA_URL)
+    # Load the data into a panda database
+    download = requests.get(COVID_DATA_URL)
+    decoded_content = download.content.decode('utf-8')
+    full_data = pd.read_csv(io.StringIO(decoded_content))
 
-    # Open workbook and collect info on local areas 
-    workbook = xlrd.open_workbook(file_contents=r.content)
-    worksheet = workbook.sheet_by_index(LOCAL_AREA_SHEET)
+    column_to_read = ['Area name','Specimen date','Cumulative lab-confirmed cases']
+    data = full_data[column_to_read]
 
-    # Fill the borough database 
-    for row in BOROUGH_ROWS:
-        area = worksheet.cell_value(row, colx=AREA_NAME_COL)
-        cases = worksheet.row_values(row, start_colx=DATA_STARTING_COL)
+    # Select the areas we are interested in
+    borough_names = POPULATIONS_DIC.keys()
+
+    # From London we can build the dates array
+    relevant_rows = data['Area name'] == 'London'
+    London_data = data.loc[relevant_rows]
+
+    # Find initial and final date for london
+    date_array = London_data['Specimen date']
+    start_date = date_array.min()
+    end_date = date_array.max()
+
+    # Create a pad for the dates
+    idx = pd.date_range(start_date, end_date)
+
+    # Save the dates into the database
+    dates_str = list(idx.strftime("%d-%b"))
+
+    try:
+        d = Dates.objects.get()
+        d.dates_array = dates_str
+    except Dates.DoesNotExist:
+        d = Dates(dates_array=dates_str)
+
+    d.save()
+
+    # Save the cumulative data into the database
+    for area in borough_names:
+        relevant_rows = data['Area name'] == area
+        borough_data = data.loc[relevant_rows]
+        borough_data.index = pd.DatetimeIndex(borough_data['Specimen date'])
+        borough_data_pad = borough_data.reindex(idx,method='pad')
+        cases = list(borough_data_pad['Cumulative lab-confirmed cases'])
 
         try:
             b = Borough.objects.get(name__exact=area)
@@ -31,32 +61,3 @@ def update_borough_database():
             b = Borough(name=area,population=pop, cumulative_array=cases)
 
         b.save()
-
-    # Add London to the database
-    london_sheet = workbook.sheet_by_index(REGIONS_SHEET)
-
-    area = london_sheet.cell_value(LONDON_ROW, colx=AREA_NAME_COL)
-    cases = london_sheet.row_values(LONDON_ROW, start_colx=DATA_STARTING_COL)
-
-    try:
-        b = Borough.objects.get(name__exact=area)
-        b.cumulative_array = cases
-    except Borough.DoesNotExist:
-        pop = sum(POPULATIONS_DIC.values())
-        b = Borough(name=area, population=pop, cumulative_array=cases)
-
-    b.save()
-
-    # Fill the date database
-    dates = worksheet.row_values(TIME_ROW, start_colx=DATA_STARTING_COL)
-
-    wdatemode = workbook.datemode
-    dates_str = [xldate_to_str(date,wdatemode) for date in dates]
-
-    try:
-        d = Dates.objects.get()
-        d.dates_array = dates_str
-    except Dates.DoesNotExist:
-        d = Dates(dates_array=dates_str)
-
-    d.save()
