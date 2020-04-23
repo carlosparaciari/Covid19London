@@ -3,6 +3,7 @@ from django.shortcuts import render, get_object_or_404
 from django.urls import reverse
 import io
 import urllib, base64
+import numpy as np
 from .plots_lib import increments, relative_cases_array, cumulative_plot_abs, cumulative_plot_rel, prepare_checklist_boroughs
 from .models import Borough, Dates
 
@@ -18,19 +19,21 @@ def cumul_abs(request,borough_name):
 	b = get_object_or_404(Borough, name__exact=borough_name)
 	d = Dates.objects.get()
 
-	# Get the date of the latest update
-	last_update = (d.dates_array)[-1]
+	# Get the dates and the date of latest update
+	d_dates_array = np.array(d.dates_array)
+	last_update = (d_dates_array)[-1]
 
-	# Get the daily increments for the borough 
-	b_increments = increments(b.cumulative_array)
+	# Get the cumulative array and the daily increments for the borough
+	b_cumulative_array = np.array(b.cumulative_array)
+	b_increments = increments(b_cumulative_array)
 
 	# Daily information
-	daily_total = (b.cumulative_array)[-1]
+	daily_total = (b_cumulative_array)[-1]
 	daily_increment = b_increments[-1]
 	daily_percentage = "{:.1f}".format(100*daily_increment/(daily_total-daily_increment))
 
 	# Plot of cumulative cases
-	cumul_abs = cumulative_plot_abs(d.dates_array, b.cumulative_array, b_increments, b.name)
+	cumul_abs = cumulative_plot_abs(d_dates_array, b_cumulative_array, b_increments, b.name)
 
 	# Save plot into buffer and convert to be able to visualise it
 	buf = io.BytesIO()
@@ -66,28 +69,46 @@ def cumul_rel(request):
 		queryset_name_cases = queryset_name_cases.exclude(name='London')
 		checkbox_items = prepare_checklist_boroughs(queryset_name_cases)
 
-	# Collect data on the selected boroughs
+	# Make a list of the selected boroughs plus London
 	select_boroughs = lambda tup : tup[1]
 	selected_boroughs = filter(select_boroughs,checkbox_items)
+	area_list = [borough_name for borough_name,_ in selected_boroughs]
+	area_list.append('London')
 
+	# Extract the relative data for each borough, and only keep cases >= 1
 	cases_rel_list = []
-	area_list = []
-	for borough_name,_ in selected_boroughs:
+	length_arrays = []
+
+	for borough_name in area_list:
 		b = Borough.objects.get(name__exact=borough_name)
-		cases_rel_list.append(relative_cases_array(b.cumulative_array, b.population))
-		area_list.append(borough_name)
+		cases_rel = relative_cases_array(b.cumulative_array, b.population)
+		relevant_cases = cases_rel >= 1
+		cases_rel_list.append(cases_rel[relevant_cases]) # Get the relevant cases
+		length_arrays.append(np.sum(relevant_cases)) # Check the lenght of the above array
 
-	# Collect data on London
-	l = Borough.objects.get(name__exact='London')
-	cases_rel_lon = relative_cases_array(l.cumulative_array, l.population)
+	# Compute the maximum length of the data when relative cases >= 1
+	max_length = max(length_arrays)
 
-	# Collect date array
+	# Pad each array to get the same length
+	cases_pad_list = []
+
+	for cases_rel in cases_rel_list:
+	    padding_length = max_length-cases_rel.size
+	    pad_cumul_rel = np.pad(cases_rel, (0,padding_length), 'constant', constant_values=np.nan)
+	    cases_pad_list.append(pad_cumul_rel)
+
+	# Prepare the data to pass the plot function
+	days_since = range(max_length) # Days since 1st relative case
+
+	multiple_data = cases_pad_list[:-1]
+	multiple_name = area_list[:-1]
+	london_data = cases_pad_list[-1]
+
+	cumul_rel = cumulative_plot_rel(days_since,multiple_data,multiple_name,london_data)
+
+	# Get the date of latest update
 	d = Dates.objects.get()
-
-	# Get the date of the latest update
 	last_update = (d.dates_array)[-1]
-
-	cumul_rel = cumulative_plot_rel(d.dates_array,cases_rel_list,area_list,cases_rel_lon)
 
 	# Save plot into buffer and convert to be able to visualise it
 	buf = io.BytesIO()
