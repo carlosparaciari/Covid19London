@@ -1,0 +1,1 @@
+web: gunicorn Covid19London.wsgi --log-file -
