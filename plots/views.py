@@ -100,11 +100,7 @@ def cumul_rel(request):
 	# Prepare the data to pass the plot function
 	days_since = range(max_length) # Days since 1st relative case
 
-	multiple_data = cases_pad_list[:-1]
-	multiple_name = area_list[:-1]
-	london_data = cases_pad_list[-1]
-
-	cumul_rel = cumulative_plot_rel(days_since,multiple_data,multiple_name,london_data)
+	cumul_rel = cumulative_plot_rel(days_since,cases_pad_list,area_list)
 
 	# Get the date of latest update
 	d = Dates.objects.get()
