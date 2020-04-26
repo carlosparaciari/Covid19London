@@ -1,1 +1,2 @@
 web: gunicorn Covid19London.wsgi --log-file -
+main_worker: celery worker -A Covid19London -B -l info --scheduler django_celery_beat.schedulers:DatabaseScheduler --without-gossip --without-mingle --without-heartbeat

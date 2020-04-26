@@ -85,7 +85,8 @@ DATABASES['default'] = dj_database_url.config(conn_max_age=600, ssl_require=True
 
 # Celery
 
-CELERY_BROKER_URL = 'amqp://'   
+CELERY_BROKER_URL = os.environ.get("CLOUDAMQP_URL", "amqp://")
+CELERY_BROKER_POOL_LIMIT = 1
 CELERY_TIMEZONE = 'GMT'
 CELERY_BEAT_SCHEDULE = {
     'check-covid_data_every-two-hours': {
@@ -93,8 +94,7 @@ CELERY_BEAT_SCHEDULE = {
         'schedule': 7200.0,
     },
 }
-CELERY_RESULT_BACKEND='django-db'
-CELERY_CACHE_BACKEND = 'django-cache'
+CELERY_RESULT_BACKEND = None
 
 
 # Password validation
