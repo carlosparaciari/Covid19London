@@ -23,7 +23,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = os.environ['SECRET_KEY']
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = os.environ.get('DJANGO_DEBUG', '') != 'False'
 
 ALLOWED_HOSTS = ['localhost','covid-19-london.herokuapp.com']
 
@@ -87,6 +87,7 @@ DATABASES['default'] = dj_database_url.config(conn_max_age=600, ssl_require=True
 CELERY_BROKER_URL = os.environ.get("CLOUDAMQP_URL", "amqp://")
 CELERY_BROKER_POOL_LIMIT = 1
 CELERY_TIMEZONE = 'GMT'
+CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
 CELERY_BEAT_SCHEDULE = {
     'check-covid_data_every-two-hours': {
         'task': 'plots.tasks.update_borough_database',
