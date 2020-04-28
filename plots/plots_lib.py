@@ -3,20 +3,25 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-from math import floor
+from math import ceil
 
+# Provide the daily increments from the array of cumulative cases
 def increments(cases_array):
     increment_array = np.insert(np.diff(cases_array), 0, cases_array[0])
     return increment_array
 
+# Provide the array of cumulative cases, relative to the population of the borough
 def relative_cases_array(cases_array, population, relative_population=1e5):
     return np.array([relative_population*daily_cases/population for daily_cases in cases_array]) 
 
-def tick_dates(dates,number_shown=5):
-    interval = floor(len(dates)/number_shown)
-    ticks = [dates[n*interval] for n in range(number_shown)]
+# Provide the position of the ticks to be shown on the x-axis
+def tick_dates(dates,number_shown=8):
+    size = len(dates)
+    interval = ceil(size/number_shown)
+    ticks = np.array([n*interval for n in range(number_shown)])
     return ticks
 
+# Provide the position of the ticks to be shown on the y-axis of the relative plot
 def tick_rel(max_val):
     integers = [1,2,5]
     orders = [10**x for x in range(6)]
@@ -25,22 +30,36 @@ def tick_rel(max_val):
     ticks_lab = [str(val) for val in ticks_val]
     return ticks_val,ticks_lab
 
+# Provide the line of percental growth for the relative plot
 def line_rel_growth(perc,size):
     a = np.log10(1+perc)
     line = np.array([10**(a*n) for n in range(size)])
     return line
 
+# Plot of cumulative cases plus increments
 def cumulative_plot_abs(dates_str,cases,increment,area):
-    fig = plt.figure()
-    plt.plot(dates_str,cases) # cumulative in time
-    plt.bar(dates_str,increment,color='g') # increment in bars
-    plt.title(area+' borough (cumulative cases)')
-    plt.xlabel('Days')
-    plt.ylabel('Cases')
-    plt.xticks(tick_dates(dates_str))
+    
+    fig, ax1 = plt.subplots()
+    
+    ax1.plot(dates_str,cases,linewidth=2) # Cumulative cases in time
+    ax1.set_xlabel('Days')
+    ax1.set_ylabel('Cases')
+
+    ax2 = ax1.twinx()
+    
+    ax2.bar(dates_str,increment,width=1.,color='g',alpha=.5) # Increment in bars
+    ax2.set_ylabel('Daily increments')
+    ax2.set_xticks(tick_dates(dates_str))
+    
+    max_increment = max(increment)
+    ax2.set_ylim(top=2*max_increment)
+    
+    fig.tight_layout()
     plt.close()
+
     return fig
 
+# Plot of relative cases for different boroughs
 def cumulative_plot_rel(dates_str,cases_rel_list,area_list,pop_rel=1e5):
 
     fig = plt.figure()
