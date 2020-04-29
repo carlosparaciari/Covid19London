@@ -36,6 +36,26 @@ def line_rel_growth(perc,size):
     line = np.array([10**(a*n) for n in range(size)])
     return line
 
+# Simple moving average for data array
+def simple_moving_average(array,period=7.):
+    
+    if period%2 == 0:
+        raise ValueError("period variable should be odd")
+
+    half_period= int((period-1.)/2.)
+    size = array.size
+
+    sma = []
+    for n in range(size):
+        if n < half_period:
+            sma.append( np.sum(array[:n+half_period+1])/float(n+half_period+1) )
+        elif n > size - (half_period+1):
+            sma.append( np.sum(array[n-half_period:])/float(size+half_period-n) )
+        else:
+            sma.append( np.sum(array[n-half_period:n+half_period+1])/period )
+
+    return np.array(sma)
+
 # Plot of cumulative cases plus increments
 def cumulative_plot_abs(dates_str,cases,increment,area):
     
@@ -44,15 +64,19 @@ def cumulative_plot_abs(dates_str,cases,increment,area):
     ax1.plot(dates_str,cases,linewidth=2) # Cumulative cases in time
     ax1.set_xlabel('Days')
     ax1.set_ylabel('Cases')
+    ax1.set_ylim(bottom=0)
 
     ax2 = ax1.twinx()
+
+    increment_sma = simple_moving_average(increment)
     
     ax2.bar(dates_str,increment,width=1.,color='g',alpha=.5) # Increment in bars
+    ax2.plot(dates_str,increment_sma,linewidth=1,color='r')
     ax2.set_ylabel('Daily increments')
     ax2.set_xticks(tick_dates(dates_str))
     
     max_increment = max(increment)
-    ax2.set_ylim(top=2*max_increment)
+    ax2.set_ylim(top=3*max_increment)
     
     fig.tight_layout()
     plt.close()
