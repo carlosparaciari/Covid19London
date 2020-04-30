@@ -72,6 +72,13 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'Covid19London.wsgi.application'
 
+# For unit testing on local machine, set ssl_require to False
+import sys
+
+ssl_bool = True
+
+if 'test' in sys.argv:
+    ssl_bool = False
 
 # Database
 # https://docs.djangoproject.com/en/3.0/ref/settings/#databases
@@ -79,8 +86,7 @@ WSGI_APPLICATION = 'Covid19London.wsgi.application'
 import dj_database_url
 
 DATABASES = {}
-
-DATABASES['default'] = dj_database_url.config(conn_max_age=600, ssl_require=True)
+DATABASES['default'] = dj_database_url.config(conn_max_age=600, ssl_require=ssl_bool)
 
 # Celery
 
