@@ -47,12 +47,11 @@ def simple_moving_average(array,period=7.):
 
     sma = []
     for n in range(size):
-        if n < half_period:
-            sma.append( np.sum(array[:n+half_period+1])/float(n+half_period+1) )
-        elif n > size - (half_period+1):
-            sma.append( np.sum(array[n-half_period:])/float(size+half_period-n) )
-        else:
-            sma.append( np.sum(array[n-half_period:n+half_period+1])/period )
+
+        initial = max(0,n-half_period)
+        final = min(size,n+half_period+1)
+
+        sma.append( np.mean(array[initial:final]) )
 
     return np.array(sma)
 
@@ -60,6 +59,9 @@ def simple_moving_average(array,period=7.):
 def cumulative_plot_abs(dates_str,cases,increment,area):
     
     fig, ax1 = plt.subplots()
+
+    ax1.set_zorder(2)
+    ax1.patch.set_visible(False)
     
     ax1.plot(dates_str,cases,linewidth=2) # Cumulative cases in time
     ax1.set_xlabel('Days')
@@ -67,6 +69,7 @@ def cumulative_plot_abs(dates_str,cases,increment,area):
     ax1.set_ylim(bottom=0)
 
     ax2 = ax1.twinx()
+    ax2.set_zorder(1)
 
     increment_sma = simple_moving_average(increment)
     
@@ -77,7 +80,7 @@ def cumulative_plot_abs(dates_str,cases,increment,area):
     
     max_increment = max(increment)
     ax2.set_ylim(top=3*max_increment)
-    
+
     fig.tight_layout()
     plt.close()
 

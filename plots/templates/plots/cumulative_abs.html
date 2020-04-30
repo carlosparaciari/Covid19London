@@ -66,6 +66,22 @@
     <b>Daily increase:</b> {{ daily_inc }} &emsp;
     <b>Percentual increase:</b> {{ daily_per }}&#37;
   </p>
+  <p style="font-size:16px;font-family: Arial;">
+    NOTE:
+      <ol style="font-size:16px;font-family: Arial;">
+      <li>
+        The blue line represents the cumulative number of Covid-19 cases recorded in the borough; the values taken by this line are shown on the left y-axis.
+      </li>
+      <li>
+        The green bars are the daily cases recorded; the value of these bars can be read on the
+        right y-axis.
+      </li>
+      <li>
+        The red line is the moving average of daily cases with a 7-day period, so as to remove
+        fluctuations due to delays during the weekends.
+      </li>
+    </ol>
+  </p>
   <p align="right" style="font-size:14px;font-family: Arial;">
     <a href="{% url 'plots:cumulative_multiple' %}">Compare London boroughs</a> &#x21E8;
   </p>
