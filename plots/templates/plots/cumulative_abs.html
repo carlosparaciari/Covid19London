@@ -25,11 +25,18 @@
   <div id="image">
   	<img src="data:image/png;base64,{{ data }}" alt="" width="52%">
   </div>
-  <p align="center">
-    <b>Total cases to date:</b> {{ daily_tot }} &emsp;
-    <b>Daily increase:</b> {{ daily_inc }} &emsp;
-    <b>Percentual increase:</b> {{ daily_per }}&#37;
-  </p>
+  <div align="center" id="daily">
+    <form method = "POST">
+      {% csrf_token %}
+      {{ date_form }} 
+      <input type = "submit" value = "Submit"> 
+    </form>
+    <p>
+      <b>Total cases to date:</b> {{ daily_tot }} &emsp;
+      <b>Daily increase:</b> {{ daily_inc }} &emsp;
+      <b>Percentual increase:</b> {{ daily_per }}&#37;
+    </p>
+  </div>
   <p>
     NOTE:
       <ol>

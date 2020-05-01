@@ -8,8 +8,13 @@ p, ol {
 }
 
 #image {
-  margin:0 auto;
-  text-align:center
+  margin: 0px 0px 15px 0px;
+  text-align: center;
+}
+
+#daily {
+  font-family: Arial;
+  font-size:16px;
 }
 
 #footnote {
