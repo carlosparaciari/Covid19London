@@ -34,7 +34,7 @@ def update_borough_database():
     idx = pd.date_range(start_date, end_date)
 
     # Save the dates into the database
-    dates_str = list(idx.strftime("%d-%b"))
+    dates_str = list(idx.strftime("%d-%b-%Y"))
 
     try:
         d = Dates.objects.get()
