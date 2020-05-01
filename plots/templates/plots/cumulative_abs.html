@@ -1,51 +1,15 @@
+{% load static %}
+<link rel="stylesheet" type="text/css" href="{% static 'plots/style.css' %}">
+
 <!DOCTYPE html>
 <html>
 <head>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <style>
-    .dropbtn {
-      background-color: #1f77b4;
-      color: white;
-      width: 230px;
-      padding: 10px;
-      font-size: 16px;
-      border: none;
-    }
-
-    .dropdown {
-      position: relative;
-      display: inline-block;
-    }
-
-    .dropdown-content {
-      display: none;
-      position: absolute;
-      background-color: #f1f1f1;
-      min-width: 230px;
-      box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
-      z-index: 1;
-    }
-
-    .dropdown-content a {
-      color: black;
-      padding: 2px 8px;
-      text-decoration: none;
-      font-family: Arial;
-      font-size: 14px;
-      display: block;
-    }
-
-    .dropdown-content a:hover {background-color: #ddd;}
-
-    .dropdown:hover .dropdown-content {display: block;}
-
-    .dropdown:hover .dropbtn {background-color: #1f77b4;}
-  </style>
 </head>
 <body>
-  <h2 style="font-family: Arial;">Cumulative cases in London boroughs</h2>
-  <p style="font-size:16px;font-family: Arial;">
-    This page shows the cumulative cases of Covid19 in different London boroughs.
+  <h2>Cumulative cases in London boroughs</h2>
+  <p>
+    This page shows the cumulative cases of Covid-19 in different London boroughs.
     The data are collected from the governative website 
     <a href="https://coronavirus.data.gov.uk">https://coronavirus.data.gov.uk</a>.
     The data are updated to <b>{{ date }}</b>.
@@ -58,17 +22,17 @@
   			{% endfor %}
   		</div>
   </div>
-  <div style="margin:0 auto;text-align:center">
-  	<img src="data:image/png;base64,{{ data }}" alt="" height="550" , width="750">
+  <div id="image">
+  	<img src="data:image/png;base64,{{ data }}" alt="" width="52%">
   </div>
-  <p align="center" style="font-size:16px;font-family: Arial;">
+  <p align="center">
     <b>Total cases to date:</b> {{ daily_tot }} &emsp;
     <b>Daily increase:</b> {{ daily_inc }} &emsp;
     <b>Percentual increase:</b> {{ daily_per }}&#37;
   </p>
-  <p style="font-size:16px;font-family: Arial;">
+  <p>
     NOTE:
-      <ol style="font-size:16px;font-family: Arial;">
+      <ol>
       <li>
         The blue line represents the cumulative number of Covid-19 cases recorded in the borough; the values taken by this line are shown on the left y-axis.
       </li>
@@ -82,11 +46,11 @@
       </li>
     </ol>
   </p>
-  <p align="right" style="font-size:14px;font-family: Arial;">
+  <p align="right">
     <a href="{% url 'plots:cumulative_multiple' %}">Compare London boroughs</a> &#x21E8;
   </p>
   <hr>
-  <p align="right" style="font-size:14px;font-family: Arial;">
+  <p align="right" id="footnote">
     This project was done using Django, and the source code can be found on
     <a href="https://github.com/carlosparaciari/Covid19London">GitHub</a>.
   </p>
