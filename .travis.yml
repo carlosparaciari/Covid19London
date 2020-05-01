@@ -1,0 +1,15 @@
+language: python
+python:
+  - 3.7
+services:
+  - postgresql
+install:
+  - pip install -r requirements.txt
+before_script:
+  - psql -c 'create database travis_ci_test;' -U postgres
+script:
+  - python manage.py test
+env:
+  global:
+    - secure: kSMPtjZLo0MdeSQZZVH4Psv18Dz7Y5oNa5vdIz5fVfUGFi4ZPJ8IB+JWaZTR8Tvntmb/F4FO1scX4ulJsHzsDaAj+wH2zvT/TrUG59PbBykAjzuUCudzB4Y1PXDHTjZKt8pbcUvuXTGc4NQ1U0QnzWwWgfDqSTWs/wPYzpejfVUnspKeuPATG+Ue2DJdmRqqr/dQGOGY9/W2Vn9PwTOclzOVuEAPw0uJFjgmeWxUMXDCGBaTE4qJii9jObAf9Gf/u4SLpelbkR3hXiYA5uqXgdG3S0gh8VESGhFvNeTa9Jwva34GKliM1BdaDV9Xo0+bBjH5OTr9oUTGMgBUbsBHosHUyVEIq1kwTYVjcGfILMDiUYaQ2nx9gP9oS1CncN9oy02F8R+sJecuWS2WuzgFhySV4xZ8Ye32FA+kc5rVtAkNanT81f6PEpyA2QfMqpoiPwyoVh/av6AeaMH0NbyOkxj0KAbDeYEYHzEOgdyuLGVAyxZLTQlzMsF/fopHNKPlQcii+2lzwHJ+Ig9AuqrRElJchr8S0uNSwCPbuTPKuFAqGRm92iXyxawn3BIpjhRPfmpqK4saMqTUO3foSfyPAIs8yrRaIo5l7zrutdPRBbkmAMq8W1wapG9Ec+33IGYpLdVFNRiyW4qeOENJtwjUrZiE5UfXo0zrqA0a51dfv6c=
+    - DATABASE_URL='postgres://postgres@localhost/travis_ci_test'
