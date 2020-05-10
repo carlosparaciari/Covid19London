@@ -51,6 +51,9 @@ def update_borough_database():
         relevant_rows = data['Area name'] == area
         borough_data = data.loc[relevant_rows]
 
+        # If there are duplicate rows, remove them
+        borough_data = borough_data.drop_duplicates()
+
         # Get the increment of cases (now padded with 0's where no cases were reported)
         borough_data.index = pd.DatetimeIndex(borough_data['Specimen date'])
         borough_data_pad = borough_data.reindex(idx,fill_value=0)
