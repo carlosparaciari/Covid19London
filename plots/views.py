@@ -17,33 +17,33 @@ def index(request):
 
 def cumul_abs(request,borough_name):
 
-	# Get dates array from database
+	# Get dates array from database and last date of update
 	d = Dates.objects.get()
-	obj_dates_array = d.get_dates()
-	dates_array = np.array([obj_date.strftime('%d %b') for obj_date in obj_dates_array])
+	dates_array = d.get_dates('%d %b')
+	last_update = d.get_single_date_str(-1,'%d %B')
 
-	# Get the latest date the database was updated
-	last_update = obj_dates_array[-1]
-	last_update_str = last_update.strftime('%d %B')
+	# Set the date the user is interested in (default is latest day)
+	date_val = d.get_single_date(-1)
 
-	# Get the date form (if it was filled)
+	# If the user has provided a date
 	if request.method == 'POST':
 		response_post = request.POST
 		response_dict = response_post.dict()
 
-		year_val = int(response_dict['date_year'])
-		month_val = int(response_dict['date_month'])
-		day_val = int(response_dict['date_day'])
+		response_year = int(response_dict['date_year'])
+		response_month = int(response_dict['date_month'])
+		response_day = int(response_dict['date_day'])
 
-		date_val = datetime(year_val, month_val, day_val)
-		date_val_str = date_val.strftime('%d %b')
+		try:
+			date_object = datetime(response_year,response_month,response_day)
+			date_requested = date_object.strftime('%d %b')
+		except ValueError:
+			date_requested = None
 
-		if not date_val_str in dates_array:
-			date_val = last_update
-			date_val_str = date_val.strftime('%d %b')
-	else:
-		date_val = last_update
-		date_val_str = date_val.strftime('%d %b')
+		if date_requested in dates_array:
+			date_val = date_object
+
+	date_val_str = date_val.strftime('%d %b')
 
 	# Make the dropdown menu
 	menu_items = [entry for entry in Borough.objects.values_list('name', flat=True)]
@@ -56,7 +56,6 @@ def cumul_abs(request,borough_name):
 	b_increments = increments(b_cumulative_array)
 
 	# Find cases for date requested
-	date_val_str = date_val.strftime('%d %b')
 	date_index = dates_array==date_val_str
 
 	# Daily information
@@ -79,7 +78,7 @@ def cumul_abs(request,borough_name):
 	context['data']=uri
 	context['items']=menu_items
 	context['current']=b.name
-	context['date']=last_update_str
+	context['date']=last_update
 	context['date_form'] = IncrementData(date_value=date_val) 
 	context['daily_tot']=daily_total
 	context['daily_inc']=daily_increment
@@ -137,9 +136,7 @@ def cumul_rel(request):
 
 	# Get the date of latest update
 	d = Dates.objects.get()
-	obj_dates_array = d.get_dates()
-	last_update = obj_dates_array[-1]
-	last_update_str = last_update.strftime('%d %B')
+	last_update = d.get_single_date_str(-1,'%d %B')
 
 	# Save plot into buffer and convert to be able to visualise it
 	buf = io.BytesIO()
@@ -150,7 +147,7 @@ def cumul_rel(request):
 
 	context = {'data':uri,
 			   'items':checkbox_items,
-			   'date':last_update_str
+			   'date':last_update
 			  }
 
 	return render(request, 'plots/cumulative_rel.html', context)

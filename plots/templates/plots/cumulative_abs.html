@@ -23,13 +23,13 @@
   		</div>
   </div>
   <div id="image">
-  	<img src="data:image/png;base64,{{ data }}" alt="" width="52%">
+  	<img src="data:image/png;base64,{{ data }}" alt="">
   </div>
   <div align="center" id="daily">
     <form method = "POST">
       {% csrf_token %}
       {{ date_form }} 
-      <input type = "submit" value = "Submit"> 
+      <input type = "submit" value = "Get cases"> 
     </form>
     <p>
       <b>Total cases to date:</b> {{ daily_tot }} &emsp;

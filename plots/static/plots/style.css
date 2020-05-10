@@ -7,8 +7,14 @@ p, ol {
   font-size: 16px;
 }
 
+img {
+  width: 95%;
+  max-width: 750px;
+  height: auto;
+}
+
 #image {
-  margin: 0px 0px 15px 0px;
+  margin: 15px 0px 15px 0px;
   text-align: center;
 }
 
