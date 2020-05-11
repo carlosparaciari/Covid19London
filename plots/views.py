@@ -10,7 +10,7 @@ from datetime import datetime
 
 from .plots_lib import increments, relative_cases_array, cumulative_plot_abs, cumulative_plot_rel, prepare_checklist_boroughs
 from .models import Borough, Dates
-from .forms import IncrementData
+from .forms import DailyCasesForm
 
 def index(request):
 	return HttpResponseRedirect(reverse('plots:cumulative_single', args=('London',)))
@@ -29,16 +29,10 @@ def cumul_abs(request,borough_name):
 	if request.method == 'POST':
 		response_post = request.POST
 		response_dict = response_post.dict()
+		response_date = response_dict['date']
 
-		response_year = int(response_dict['date_year'])
-		response_month = int(response_dict['date_month'])
-		response_day = int(response_dict['date_day'])
-
-		try:
-			date_object = datetime(response_year,response_month,response_day)
-			date_requested = date_object.strftime('%d %b')
-		except ValueError:
-			date_requested = None
+		date_object = datetime.strptime(response_date, '%Y-%m-%d')
+		date_requested = date_object.strftime('%d %b')
 
 		if date_requested in dates_array:
 			date_val = date_object
@@ -79,7 +73,7 @@ def cumul_abs(request,borough_name):
 	context['items']=menu_items
 	context['current']=b.name
 	context['date']=last_update
-	context['date_form'] = IncrementData(date_value=date_val) 
+	context['date_form']=DailyCasesForm(initial={'date': date_val}) 
 	context['daily_tot']=daily_total
 	context['daily_inc']=daily_increment
 	context['daily_per']=daily_percentage

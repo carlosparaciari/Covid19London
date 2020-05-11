@@ -4,6 +4,7 @@ from django.db import models
 from datetime import datetime
 import numpy as np
 
+# Model for saving cumulative cases of London's boroughs
 class Borough(models.Model):
 	name = models.CharField(max_length=200)
 	population = models.IntegerField(default=0)
@@ -12,6 +13,7 @@ class Borough(models.Model):
 	def __str__(self):
 		return self.name
 
+# Model to save the dates since first infection
 class Dates(models.Model):
 	dates_array = ArrayField(models.CharField(max_length=200))
 
@@ -31,3 +33,7 @@ class Dates(models.Model):
 	def get_single_date_str(self,index,date_format):
 		date_object = self.get_single_date(index)
 		return date_object.strftime(date_format)
+
+# Model to collect user data requests
+class DateCases(models.Model):
+	date = models.DateField()
