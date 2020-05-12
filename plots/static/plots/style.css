@@ -13,6 +13,43 @@ img {
   height: auto;
 }
 
+#left_column {
+  box-sizing: border-box;
+  float: left;
+  width: 15%;
+  min-width: 220px;
+  padding: 10px;
+}
+
+#right_column {
+  box-sizing: border-box;
+  float: left;
+  width: 85%;
+  padding: 10px;
+  text-align:center;
+}
+
+.row:after {
+  content: "";
+  display: table;
+  clear: both;
+}
+
+#checkbox_list {
+  font-size: 14px;
+  font-family: Arial;
+}
+
+#submit_button {
+  background-color: #1f77b4;
+  color: white;
+  width: 100%;
+  padding: 10px;
+  font-size: 16px;
+  border: none;
+  margin-top:10px;
+}
+
 #image {
   margin: 15px 0px 15px 0px;
   text-align: center;
