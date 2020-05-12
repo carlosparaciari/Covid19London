@@ -5,9 +5,6 @@ from .models import DateCases
 
 from datetime import date
 
-class BoroughChecklist(forms.Form):
-	show_borough = forms.BooleanField()
-
 class DateInput(forms.DateInput):
 	input_type = 'date'
 

@@ -7,6 +7,7 @@ import urllib
 import base64
 import numpy as np
 from datetime import datetime
+import matplotlib._color_data as mcd
 
 from .plots_lib import increments, relative_cases_array, cumulative_plot_abs, cumulative_plot_rel, prepare_checklist_boroughs
 from .models import Borough, Dates
@@ -100,11 +101,19 @@ def cumul_rel(request):
 		queryset_name_cases = queryset_name_cases.exclude(name='London')
 		checkbox_items = prepare_checklist_boroughs(queryset_name_cases)
 
+	# Order the checkbox list
+	checkbox_items.sort(key=lambda tup: tup[0])
+	borough_list, bool_list = [*zip(*checkbox_items)]
+	borough_array = np.array(borough_list)
+	bool_array = np.array(bool_list)
+
+	# Predefine colour palette
+	col_array = np.array([col for n,col in enumerate(mcd.XKCD_COLORS.values()) if n < len(checkbox_items)])
+	col_list = col_array[bool_array]
+
 	# Make a list of the selected boroughs plus London
-	select_boroughs = lambda tup : tup[1]
-	selected_boroughs = filter(select_boroughs,checkbox_items)
-	area_list = [borough_name for borough_name,_ in selected_boroughs]
-	area_list.append('London')
+	area_list = borough_array[bool_array]
+	area_list = np.append(area_list,'London')
 
 	# Extract the relative data for each borough, and only keep cases >= 1
 	cases_rel_list = []
@@ -131,7 +140,7 @@ def cumul_rel(request):
 	# Prepare the data to pass the plot function
 	days_since = range(max_length) # Days since 1st relative case
 
-	cumul_rel = cumulative_plot_rel(days_since,cases_pad_list,area_list)
+	cumul_rel = cumulative_plot_rel(days_since,cases_pad_list,area_list,col_list)
 
 	# Get the date of latest update
 	d = Dates.objects.get()
@@ -144,9 +153,9 @@ def cumul_rel(request):
 	string = base64.b64encode(buf.read())
 	uri = urllib.parse.quote(string)
 
-	context = {'data':uri,
-			   'items':checkbox_items,
-			   'date':last_update
-			  }
+	context = {}
+	context['data']=uri
+	context['items']=checkbox_items
+	context['date']=last_update
 
 	return render(request, 'plots/cumulative_rel.html', context)

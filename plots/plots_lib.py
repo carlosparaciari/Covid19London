@@ -87,7 +87,7 @@ def cumulative_plot_abs(dates_str,cases,increment,area):
     return fig
 
 # Plot of relative cases for different boroughs
-def cumulative_plot_rel(dates_str,cases_rel_list,area_list,pop_rel=1e5):
+def cumulative_plot_rel(dates_str,cases_rel_list,area_list,col_list,pop_rel=1e5):
 
     fig = plt.figure()
 
@@ -97,8 +97,8 @@ def cumulative_plot_rel(dates_str,cases_rel_list,area_list,pop_rel=1e5):
     london_data = cases_rel_list[-1]
     
     # Plot all the different boroughs passed to the function
-    for cases_rel,area in zip(borough_list,name_list):
-        plt.semilogy(dates_str,cases_rel,label=area,linewidth=2)
+    for cases_rel,area,col in zip(borough_list,name_list,col_list):
+        plt.semilogy(dates_str,cases_rel,label=area,linewidth=2,color=col)
         
     # Plot London average for comparison
     plt.semilogy(dates_str,london_data,'-.',color='gray',label='London')
