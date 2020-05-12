@@ -16,15 +16,12 @@ img {
 #left_column {
   box-sizing: border-box;
   float: left;
-  width: 15%;
-  min-width: 220px;
   padding: 10px;
 }
 
 #right_column {
   box-sizing: border-box;
   float: left;
-  width: 85%;
   padding: 10px;
   text-align:center;
 }
@@ -38,12 +35,19 @@ img {
 #checkbox_list {
   font-size: 14px;
   font-family: Arial;
+  font-weight: normal;
+  line-height: 50%;
+}
+
+#checkbox_entry {
+  font-weight: normal;
 }
 
 #submit_button {
   background-color: #1f77b4;
   color: white;
   width: 100%;
+  max-width: 220px;
   padding: 10px;
   font-size: 16px;
   border: none;

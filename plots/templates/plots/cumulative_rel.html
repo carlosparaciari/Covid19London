@@ -5,52 +5,55 @@
 <html>
 <head>
 	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet" />
 </head>
 <body>
-	<h2>Comparison between cases in London boroughs</h2>
-	<p>
-		This page shows a comparison between cumulative cases of Covid-19 in different London's boroughs.
-		The data are collected from the governative website 
-		<a href="https://coronavirus.data.gov.uk">https://coronavirus.data.gov.uk</a>.
-		The data are updated to <b>{{ date }}</b>.
-	</p>
-	<div class="row">
-  		<div class="column" id="left_column">
-    		<form action="{% url 'plots:cumulative_multiple' %}" method="post">
-				<div id="checkbox_list">
-					{% csrf_token %}
-					{% for entry in items %}
-					    <input type="checkbox" name="{{ entry.0 }}" value="compare" {% if entry.1 %}checked{% endif %}>
-					    <label for="{{ entry.0 }}">{{ entry.0 }}</label><br>
-					{% endfor %}
-					<input type="submit" value="Compare boroughs" id="submit_button">
-				</div>
-			</form>
+	<div class="container-fluid">
+		<h2>Comparison between cases in London boroughs</h2>
+		<p>
+			This page shows a comparison between cumulative cases of Covid-19 in different London's boroughs.
+			The data are collected from the governative website 
+			<a href="https://coronavirus.data.gov.uk">https://coronavirus.data.gov.uk</a>.
+			The data are updated to <b>{{ date }}</b>.
+		</p>
+		<div class="row">
+			<div class="col-md-2 col-xs-12">
+	    	<form action="{% url 'plots:cumulative_multiple' %}" method="post">
+					<div id="checkbox_list">
+						{% csrf_token %}
+						{% for entry in items %}
+						<input type="checkbox" name="{{ entry.0 }}" value="compare" {% if entry.1 %}checked{% endif %}>
+						  <label for="{{ entry.0 }}" id="checkbox_entry">{{ entry.0 }}</label><br>
+						{% endfor %}
+						<input type="submit" value="Compare boroughs" id="submit_button">
+					</div>
+				</form>
+			</div>
+			<div class="col-md-10 col-xs-12" id="right_column">
+				<img src="data:image/png;base64,{{ data }}" alt="">
+				<p align="left">
+					NOTE:
+					<ol align="left">
+					<li>
+						To allow for comparing cases between different boroughs, the number of cases are taken relative to 100,000 people.
+					</li>
+					<li>
+						To normalise the cases we have used the latest population estimates (2018) released by the <a href="https://www.ons.gov.uk/peoplepopulationandcommunity/populationandmigration/populationestimates">Office of National Statistics</a>.
+					</li>
+					<li>
+						Rather than showing the cases by date, we show them by days passed since the first relative case occurred.
+					</li>
+					</ol>
+				</p>
+			</div>
 		</div>
-	 	<div class="column" id="right_column">
-			<img src="data:image/png;base64,{{ data }}" alt="">
-			<p align="left">
-				NOTE: {{ test }}
-				<ol align="left">
-				<li>
-					To allow for comparing cases between different boroughs, the number of cases are taken relative to 100,000 people.
-				</li>
-				<li>
-					To normalise the cases we have used the latest population estimates (2018) released by the <a href="https://www.ons.gov.uk/peoplepopulationandcommunity/populationandmigration/populationestimates">Office of National Statistics</a>.
-				</li>
-				<li>
-					Rather than showing the cases by date, we show them by days passed since the first relative case occurred.
-				</li>
-				</ol>
-			</p>
-		</div>
+		<p align="right">
+	    <a href="{% url 'plots:cumulative_single' 'London' %}">Absolute cumulative cases</a> &#x21E8;
+		</p>
+		<hr>
+		<p align="right" id="footnote">
+			This project was made using Django, and the source code can be found on
+			<a href="https://github.com/carlosparaciari/Covid19London">GitHub</a>.
+		</p>
 	</div>
-	<p align="right">
-    <a href="{% url 'plots:cumulative_single' 'London' %}">Absolute cumulative cases</a> &#x21E8;
-	</p>
-	<hr>
-	<p align="right" id="footnote">
-		This project was made using Django, and the source code can be found on
-		<a href="https://github.com/carlosparaciari/Covid19London">GitHub</a>.
-	</p>
 </body>
