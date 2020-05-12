@@ -26,16 +26,16 @@
   	<img src="data:image/png;base64,{{ data }}" alt="">
   </div>
   <div align="center" id="daily">
-    <form method = "POST">
-      {% csrf_token %}
+    <form method = "GET">
       {{ date_form }} 
-      <input type = "submit" value = "Get cases"> 
+      <input type = "submit" value = "Show cases"> 
     </form>
     <p>
       <b>Total cases to date:</b> {{ daily_tot }} &emsp;
       <b>Daily increase:</b> {{ daily_inc }} &emsp;
       <b>Percentual increase:</b> {{ daily_per }}&#37;
     </p>
+    <p>{{ test }}</p>
   </div>
   <p>
     NOTE:

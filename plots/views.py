@@ -26,21 +26,26 @@ def cumul_abs(request,borough_name):
 	date_val = d.get_single_date(-1)
 
 	# If the user has provided a date
-	if request.method == 'POST':
-		response_post = request.POST
-		response_dict = response_post.dict()
-		response_date = response_dict['date']
+	if request.method == 'GET' and 'date' in request.GET:
+		response = request.GET
+		response_date = response.get('date')
 
-		date_object = datetime.strptime(response_date, '%Y-%m-%d')
-		date_requested = date_object.strftime('%d %b')
-
-		if date_requested in dates_array:
-			date_val = date_object
+		try:
+			date_object = datetime.strptime(response_date, '%Y-%m-%d')
+		except ValueError:
+			pass
+		else:
+			date_requested = date_object.strftime('%d %b')
+			if date_requested in dates_array:
+				date_val = date_object
 
 	date_val_str = date_val.strftime('%d %b')
 
 	# Make the dropdown menu
-	menu_items = [entry for entry in Borough.objects.values_list('name', flat=True)]
+	full_list = [entry for entry in Borough.objects.values_list('name', flat=True)]
+	full_list.remove('London')
+	sort_list = np.sort(full_list)
+	menu_items = np.append(sort_list,'London')
 
 	# Get relevant borough and dates
 	b = get_object_or_404(Borough, name__exact=borough_name)
