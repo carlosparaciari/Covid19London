@@ -73,13 +73,17 @@ def cumulative_plot_abs(dates_str,cases,increment,area):
 
     increment_sma = simple_moving_average(increment)
     
-    ax2.bar(dates_str,increment,width=1.,color='g',alpha=.5) # Increment in bars
+    pltbar = ax2.bar(dates_str,increment,width=1.,color='darkseagreen') # Increment in bar
     ax2.plot(dates_str,increment_sma,linewidth=1,color='r')
     ax2.set_ylabel('Daily increments')
     ax2.set_xticks(tick_dates(dates_str))
     
     max_increment = max(increment)
     ax2.set_ylim(top=3*max_increment)
+
+    # Highlight last 5 bars (they are provisional values)
+    for n in range(5):
+        pltbar[-(n+1)].set_color('forestgreen')
 
     fig.tight_layout()
     plt.close()
