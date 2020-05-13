@@ -17,7 +17,8 @@
 			The data are updated to <b>{{ date }}</b>.
 		</p>
 		<div class="row">
-			<div class="col-md-2 col-xs-12">
+			<div class="col-md-3 col-xs-12">
+				<p>Select boroughs to compare:</p>
 	    	<form action="{% url 'plots:cumulative_multiple' %}" method="post">
 					<div id="checkbox_list">
 						{% csrf_token %}
@@ -29,10 +30,10 @@
 					</div>
 				</form>
 			</div>
-			<div class="col-md-10 col-xs-12" id="right_column">
+			<div class="col-md-9 col-xs-12" id="right_column">
 				<img src="data:image/png;base64,{{ data }}" alt="">
 				<p align="left">
-					NOTE:
+					<b>NOTE:</b>
 					<ol align="left">
 					<li>
 						To allow for comparing cases between different boroughs, the number of cases is taken relative to 100,000 people.
