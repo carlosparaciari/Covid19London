@@ -9,18 +9,18 @@
 </head>
 <body>
   <div class="container-fluid">
-    <h2>Cumulative cases in London boroughs</h2>
+    <h2>Cumulative cases in Italy's provinces</h2>
     <p>
-      This page shows the cumulative cases of Covid-19 in different London boroughs.
-      The data are collected from the governmental website 
-      <a href="https://coronavirus.data.gov.uk">https://coronavirus.data.gov.uk</a>.
+      This page shows the cumulative cases of Covid-19 in different Italian provinces.
+      The data are collected from the Protezione Civile Italina, 
+      <a href="https://github.com/pcm-dpc/COVID-19">link</a>.
       The data are updated to <b>{{ date }}</b>.
     </p>
     <div class="dropdown">
     	<button class="dropbtn">{{ current }}</button>
     		<div class="dropdown-content">
     			{% for entry in items %}
-    					<a href="{% url 'plots:cumulative_single' entry %}">{{ entry }}</a>
+    					<a href="{% url 'plots:cumulative_italy' entry %}">{{ entry }}</a>
     			{% endfor %}
     		</div>
     </div>
@@ -43,7 +43,7 @@
       <b>NOTE:</b>
         <ol>
         <li>
-          The blue line represents the cumulative number of Covid-19 cases recorded in the borough. The values taken by this line are shown on the left y-axis.
+          The blue line represents the cumulative number of Covid-19 cases recorded in the province. The values taken by this line are shown on the left y-axis.
         </li>
         <li>
           The green bars are the daily cases recorded. The value of these bars can be read on the
@@ -58,12 +58,9 @@
         </li>
       </ol>
     </p>
-    <p align="right">
-      <a href="{% url 'plots:cumulative_multiple' %}">Compare London boroughs</a> &#x21E8;
-    </p>
     <hr>
     <p style="text-align:left;">
-      <a href="{% url 'plots:cumulative_italy' 'Milano' %}">&#x1f1ee;&#x1f1f9;</a>
+      <a href="{% url 'plots:cumulative_single' 'London' %}">&#x1f1ec;&#x1f1e7;</a>
       <span style="float:right;" id="footnote">
         This project was made using Django, and the source code can be found on
         <a href="https://github.com/carlosparaciari/Covid19London">GitHub</a>.
@@ -71,3 +68,10 @@
     </p>
   </div>
 </body>
+
+ <!--    <input type="text" id="province_search" placeholder="Select province...">
+    <ul id="province_list">
+      {% for entry in items %}
+        <li><a href="{% url 'plots:cumulative_italy' entry %}">{{ entry }}</a>
+      {% endfor %}
+    </ul> -->

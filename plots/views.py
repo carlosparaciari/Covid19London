@@ -99,7 +99,7 @@ def cumul_abs(request,borough_name):
 def cumul_ita(request,province_name):
 
 	context = cumulative_cases(request,ItalyDate,Province,province_name)
-	return render(request, 'plots/cumulative_abs.html', context)
+	return render(request, 'plots/cumulative_italy.html', context)
 
 def cumul_rel(request):
 
