@@ -10,16 +10,17 @@ from datetime import datetime
 import matplotlib._color_data as mcd
 
 from .plots_lib import increments, relative_cases_array, cumulative_plot_abs, cumulative_plot_rel, prepare_checklist_boroughs
-from .models import Borough, LondonDate
+from .models import Borough, Province, LondonDate, ItalyDate
 from .forms import DailyCasesForm
 
 def index(request):
 	return HttpResponseRedirect(reverse('plots:cumulative_single', args=('London',)))
 
-def cumul_abs(request,borough_name):
+# This function prepare the context for the absolute plots (for both London and Italy)
+def cumulative_cases(request,model_date,model_region,regional_name):
 
 	# Get dates array from database and last date of update
-	d = LondonDate.objects.get()
+	d = model_date.objects.get()
 	dates_array = d.get_dates('%d %b')
 	last_update = d.get_single_date_str(-1,'%d %B')
 
@@ -43,13 +44,13 @@ def cumul_abs(request,borough_name):
 	date_val_str = date_val.strftime('%d %b')
 
 	# Make the dropdown menu
-	full_list = [entry for entry in Borough.objects.values_list('name', flat=True)]
+	full_list = [entry for entry in model_region.objects.values_list('name', flat=True)]
 	full_list.remove('London')
 	sort_list = np.sort(full_list)
 	menu_items = np.append(sort_list,'London')
 
 	# Get relevant borough and dates
-	b = get_object_or_404(Borough, name__exact=borough_name)
+	b = get_object_or_404(model_region, name__exact=regional_name)
 
 	# Get the cumulative array and the daily increments for the borough
 	b_cumulative_array = np.array(b.cumulative_array)
@@ -83,7 +84,17 @@ def cumul_abs(request,borough_name):
 	context['daily_tot']=daily_total
 	context['daily_inc']=daily_increment
 	context['daily_per']=daily_percentage
-	
+
+	return context
+
+def cumul_abs(request,borough_name):
+
+	context = cumulative_cases(request,LondonDate,Borough,borough_name)
+	return render(request, 'plots/cumulative_abs.html', context)
+
+def cumul_ita(request,province_name):
+
+	context = cumulative_cases(request,ItalyDate,Province,province_name)
 	return render(request, 'plots/cumulative_abs.html', context)
 
 def cumul_rel(request):
@@ -161,6 +172,6 @@ def cumul_rel(request):
 	return render(request, 'plots/cumulative_rel.html', context)
 
 def cumul_ita(request):
-	
+
 	return HttpResponse("Here it goes the Italian page.")
 
