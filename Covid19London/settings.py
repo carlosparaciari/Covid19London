@@ -101,7 +101,7 @@ CELERY_BEAT_SCHEDULE = {
     },
     'check-italy_data_every-two-hours': {
         'task': 'plots.tasks.update_province_database',
-        'schedule': 7200.0,
+        'schedule': 72.0,
     },
 }
 CELERY_RESULT_BACKEND = None

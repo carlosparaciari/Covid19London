@@ -114,13 +114,13 @@ def update_province_database():
         provincia_data = provincia_data.drop_duplicates()
 
         # Compute the cumulative number of cases out of the increment array
-        cases = np.array(provincia_data['totale_casi'])
+        cases = list(provincia_data['totale_casi'])
 
         try:
             p = Province.objects.get(name__exact=area)
             p.cumulative_array = cases
         except Province.DoesNotExist:
-            pop = POPULATIONS_DIC_ITA[area]
+            pop = POPULATIONS_ITA[area]
             p = Province(name=area,population=pop, cumulative_array=cases)
 
         p.save()
