@@ -95,8 +95,12 @@ CELERY_BROKER_POOL_LIMIT = 1
 CELERY_TIMEZONE = 'GMT'
 CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
 CELERY_BEAT_SCHEDULE = {
-    'check-covid_data_every-two-hours': {
+    'check-london_data_every-two-hours': {
         'task': 'plots.tasks.update_borough_database',
+        'schedule': 7200.0,
+    },
+    'check-italy_data_every-two-hours': {
+        'task': 'plots.tasks.update_province_database',
         'schedule': 7200.0,
     },
 }

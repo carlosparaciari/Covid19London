@@ -6,8 +6,10 @@ import requests
 import io
 
 from celery import shared_task
-from .models import Borough, LondonDate
-from .plots_settings import COVID_DATA_URL, POPULATIONS_DIC, COLUMN_TO_READ
+from .models import Borough, Province, LondonDate, ItalyDate
+from .plots_settings import COVID_DATA_URL, POPULATIONS_DIC, COLUMN_TO_READ, COVID_DATA_URL_ITA, COLUMNS_TO_READ_ITA, POPULATIONS_ITA
+
+# This task takes care of the London database
 
 @shared_task
 def update_borough_database():
@@ -71,3 +73,54 @@ def update_borough_database():
             b = Borough(name=area,population=pop, cumulative_array=cases)
 
         b.save()
+
+# This task takes care of the Italian database
+
+@shared_task
+def update_province_database():
+
+    # Load the data into a panda database
+    download = requests.get(COVID_DATA_URL_ITA)
+    decoded_content = download.content.decode('utf-8')
+    full_data = pd.read_csv(io.StringIO(decoded_content))
+    data = full_data[COLUMNS_TO_READ_ITA]
+
+    # Make a list of all different province in Italy
+    province = data['denominazione_provincia'].drop_duplicates()
+    bool_non_prov = ~ province.str.contains('/')
+    province = province[bool_non_prov]
+
+    # Make a list of all dates
+    dates = data['data'].drop_duplicates()
+    dates = pd.to_datetime(dates)
+    dates_str = [date.strftime("%d-%b-%Y") for date in dates]
+
+    try:
+        d = ItalyDate.objects.get()
+        d.dates_array = dates_str
+    except ItalyDate.DoesNotExist:
+        d = ItalyDate(dates_array=dates_str)
+
+    d.save()
+
+    # Save the cumulative data into the database
+    for area in province:
+
+        # Get the data for the relevant borough
+        relevant_rows = data['denominazione_provincia'] == area
+        provincia_data = data.loc[relevant_rows]
+
+        # If there are duplicate rows, remove them
+        provincia_data = provincia_data.drop_duplicates()
+
+        # Compute the cumulative number of cases out of the increment array
+        cases = np.array(provincia_data['totale_casi'])
+
+        try:
+            p = Province.objects.get(name__exact=area)
+            p.cumulative_array = cases
+        except Province.DoesNotExist:
+            pop = POPULATIONS_DIC_ITA[area]
+            p = Province(name=area,population=pop, cumulative_array=cases)
+
+        p.save()
