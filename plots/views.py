@@ -10,7 +10,7 @@ from datetime import datetime
 import matplotlib._color_data as mcd
 
 from .plots_lib import increments, relative_cases_array, cumulative_plot_abs, cumulative_plot_rel, prepare_checklist_boroughs
-from .models import Borough, Dates
+from .models import Borough, LondonDate
 from .forms import DailyCasesForm
 
 def index(request):
@@ -19,7 +19,7 @@ def index(request):
 def cumul_abs(request,borough_name):
 
 	# Get dates array from database and last date of update
-	d = Dates.objects.get()
+	d = LondonDate.objects.get()
 	dates_array = d.get_dates('%d %b')
 	last_update = d.get_single_date_str(-1,'%d %B')
 
@@ -143,7 +143,7 @@ def cumul_rel(request):
 	cumul_rel = cumulative_plot_rel(days_since,cases_pad_list,area_list,col_list)
 
 	# Get the date of latest update
-	d = Dates.objects.get()
+	d = LondonDate.objects.get()
 	last_update = d.get_single_date_str(-1,'%d %B')
 
 	# Save plot into buffer and convert to be able to visualise it

@@ -6,7 +6,7 @@ import requests
 import io
 
 from celery import shared_task
-from .models import Borough, Dates
+from .models import Borough, LondonDate
 from .plots_settings import COVID_DATA_URL, POPULATIONS_DIC, COLUMN_TO_READ
 
 @shared_task
@@ -37,10 +37,10 @@ def update_borough_database():
     dates_str = list(idx.strftime("%d-%b-%Y"))
 
     try:
-        d = Dates.objects.get()
+        d = LondonDate.objects.get()
         d.dates_array = dates_str
-    except Dates.DoesNotExist:
-        d = Dates(dates_array=dates_str)
+    except LondonDate.DoesNotExist:
+        d = LondonDate(dates_array=dates_str)
 
     d.save()
 

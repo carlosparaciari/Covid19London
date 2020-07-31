@@ -28,7 +28,7 @@ class Province(RegionalArea):
 	class Meta(RegionalArea.Meta):
 		db_table = 'Italy_provinces'
 
-# Model to save the dates since first infection
+# Abstract model for dates since first infection
 class Dates(models.Model):
 	dates_array = ArrayField(models.CharField(max_length=200))
 
@@ -48,6 +48,21 @@ class Dates(models.Model):
 	def get_single_date_str(self,index,date_format):
 		date_object = self.get_single_date(index)
 		return date_object.strftime(date_format)
+
+	class Meta:
+		abstract = True
+
+# Model of dates since first infection London
+class LondonDate(Dates):
+
+	class Meta(Dates.Meta):
+		db_table = 'London_dates'
+
+# Model of dates since first infection Italy
+class ItalyDate(Dates):
+
+	class Meta(Dates.Meta):
+		db_table = 'Italy_dates'
 
 # Model to collect user data requests
 class DateCases(models.Model):
