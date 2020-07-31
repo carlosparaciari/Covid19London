@@ -14,19 +14,19 @@ class RegionalArea(models.Model):
 		return self.name
 
 	class Meta:
-        abstract = True
+		abstract = True
 
 # Model for saving cumulative cases of London's boroughs
 class Borough(RegionalArea):
 
 	class Meta(RegionalArea.Meta):
-        db_table = 'London_boroughs'
+		db_table = 'London_boroughs'
 
 # Model for saving cumulative cases of Italian province
 class Province(RegionalArea):
 
 	class Meta(RegionalArea.Meta):
-        db_table = 'Italy_provinces'
+		db_table = 'Italy_provinces'
 
 # Model to save the dates since first infection
 class Dates(models.Model):
