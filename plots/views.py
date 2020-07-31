@@ -159,3 +159,8 @@ def cumul_rel(request):
 	context['date']=last_update
 
 	return render(request, 'plots/cumulative_rel.html', context)
+
+def cumul_ita(request):
+	
+	return HttpResponse("Here it goes the Italian page.")
+
