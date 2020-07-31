@@ -45,9 +45,13 @@ def cumulative_cases(request,model_date,model_region,regional_name):
 
 	# Make the dropdown menu
 	full_list = [entry for entry in model_region.objects.values_list('name', flat=True)]
-	full_list.remove('London')
-	sort_list = np.sort(full_list)
-	menu_items = np.append(sort_list,'London')
+
+	try:
+		full_list.remove('London')
+		sort_list = np.sort(full_list)
+		menu_items = np.append(sort_list,'London')
+	except ValueError:
+		menu_items = np.sort(full_list)
 
 	# Get relevant borough and dates
 	b = get_object_or_404(model_region, name__exact=regional_name)
@@ -170,8 +174,3 @@ def cumul_rel(request):
 	context['date']=last_update
 
 	return render(request, 'plots/cumulative_rel.html', context)
-
-def cumul_ita(request):
-
-	return HttpResponse("Here it goes the Italian page.")
-
