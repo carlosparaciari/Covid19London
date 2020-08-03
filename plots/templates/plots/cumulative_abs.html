@@ -62,11 +62,11 @@
       <a href="{% url 'plots:cumulative_multiple' %}">Compare London boroughs</a> &#x21E8;
     </p>
     <hr>
-    <p style="text-align:left;">
-      <a href="{% url 'plots:cumulative_italy' 'Milano' %}">&#x1f1ee;&#x1f1f9;</a>
-      <span style="float:right;" id="footnote">
-        This project was made using Django, and the source code can be found on
-        <a href="https://github.com/carlosparaciari/Covid19London">GitHub</a>.
+    <p id="footnote">
+      This project was made using Django, and the source code can be found on
+      <a href="https://github.com/carlosparaciari/Covid19London">GitHub</a>.
+      <span style="float:right;" >
+        <a href="{% url 'plots:cumulative_italy' 'Milano' %}">&#x1f1ee;&#x1f1f9;</a>
       </span>
     </p>
   </div>

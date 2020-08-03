@@ -12,17 +12,18 @@
     <h2>Cumulative cases in Italy's provinces</h2>
     <p>
       This page shows the cumulative cases of Covid-19 in different Italian provinces.
-      The data are collected from the Protezione Civile Italina, 
-      <a href="https://github.com/pcm-dpc/COVID-19">link</a>.
+      The data are collected from the Protezione Civile Italina 
+      (<a href="https://github.com/pcm-dpc/COVID-19">link</a>).
       The data are updated to <b>{{ date }}</b>.
     </p>
     <div class="dropdown">
-    	<button class="dropbtn">{{ current }}</button>
-    		<div class="dropdown-content">
-    			{% for entry in items %}
-    					<a href="{% url 'plots:cumulative_italy' entry %}">{{ entry }}</a>
-    			{% endfor %}
-    		</div>
+      <button onclick="click_search()" class="dropbtn">{{ current }}</button>
+      <div id="src_dropdown" class="dropdown-content">
+        <input type="text" placeholder=" Select province..." id="src_input" onkeyup="filter_search()">
+        {% for entry in items %}
+            <a href="{% url 'plots:cumulative_italy' entry %}">{{ entry }}</a>
+        {% endfor %}
+      </div>
     </div>
     <div id="image">
     	<img src="data:image/png;base64,{{ data }}" alt="">
@@ -50,28 +51,41 @@
           right y-axis.
         </li>
         <li>
-          The light green bars are definitive data, while the dark green ones are provisional and will likely be updated in the coming days.
-        </li>
-        <li>
           The red line is the moving average of daily cases with a 7-day period, to remove
           fluctuations due to delays during the weekends.
         </li>
       </ol>
     </p>
     <hr>
-    <p style="text-align:left;">
-      <a href="{% url 'plots:cumulative_single' 'London' %}">&#x1f1ec;&#x1f1e7;</a>
-      <span style="float:right;" id="footnote">
-        This project was made using Django, and the source code can be found on
-        <a href="https://github.com/carlosparaciari/Covid19London">GitHub</a>.
+    <p id="footnote">
+      This project was made using Django, and the source code can be found on
+      <a href="https://github.com/carlosparaciari/Covid19London">GitHub</a>.
+      <span style="float:right;" >
+        <a href="{% url 'plots:cumulative_single' 'London' %}">&#x1f1ec;&#x1f1e7;</a>
       </span>
     </p>
   </div>
-</body>
 
- <!--    <input type="text" id="province_search" placeholder="Select province...">
-    <ul id="province_list">
-      {% for entry in items %}
-        <li><a href="{% url 'plots:cumulative_italy' entry %}">{{ entry }}</a>
-      {% endfor %}
-    </ul> -->
+<script>
+function click_search() {
+  document.getElementById("src_dropdown").classList.toggle("show");
+}
+
+function filter_search() {
+  var input, filter, ul, li, a, i;
+  input = document.getElementById("src_input");
+  filter = input.value.toUpperCase();
+  div = document.getElementById("src_dropdown");
+  a = div.getElementsByTagName("a");
+  for (i = 0; i < a.length; i++) {
+    txtValue = a[i].textContent || a[i].innerText;
+    if (txtValue.toUpperCase().indexOf(filter) > -1) {
+      a[i].style.display = "";
+    } else {
+      a[i].style.display = "none";
+    }
+  }
+}
+</script>
+
+</body>
