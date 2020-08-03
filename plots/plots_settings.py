@@ -2,9 +2,11 @@
 
 # For London boroughs
 
-COVID_DATA_URL = "https://coronavirus.data.gov.uk/downloads/csv/coronavirus-cases_latest.csv"
-
-COLUMN_TO_READ = ['Area name','Specimen date','Daily lab-confirmed cases']
+COVID_DATA_API = ('https://api.coronavirus.data.gov.uk/v1/data?'
+                  'filters=areaName={name}&'
+                  'structure={{"SpecimenDate":"date","DailyCases":"newCasesBySpecimenDate","DailyDeaths":"cumDeathsByDeathDate"}}&'
+                  'format=csv'
+                 )
 
 POPULATIONS_DIC = {
     "Barking and Dagenham":211998,
@@ -17,7 +19,7 @@ POPULATIONS_DIC = {
     "Ealing":341982,
     "Enfield":333869,
     "Greenwich":286186,
-    "Hackney":279665,
+    "Hackney and City of London":279665,
     "Hammersmith and Fulham":185426,
     "Haringey":270624,
     "Harrow":250149,

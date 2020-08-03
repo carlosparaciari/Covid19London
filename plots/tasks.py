@@ -7,28 +7,21 @@ import io
 
 from celery import shared_task
 from .models import Borough, Province, LondonDate, ItalyDate
-from .plots_settings import COVID_DATA_URL, POPULATIONS_DIC, COLUMN_TO_READ, COVID_DATA_URL_ITA, COLUMNS_TO_READ_ITA, POPULATIONS_ITA
+from .plots_settings import COVID_DATA_API, POPULATIONS_DIC, COVID_DATA_URL_ITA, COLUMNS_TO_READ_ITA, POPULATIONS_ITA
 
 # This task takes care of the London database
 
 @shared_task
 def update_borough_database():
 
-    # Load the data into a panda database
-    download = requests.get(COVID_DATA_URL)
-    decoded_content = download.content.decode('utf-8')
-    full_data = pd.read_csv(io.StringIO(decoded_content))
-    data = full_data[COLUMN_TO_READ]
+    ## Dates table
 
-    # Select the areas we are interested in
-    borough_names = POPULATIONS_DIC.keys()
-
-    # From London we can build the dates array
-    relevant_rows = data['Area name'] == 'London'
-    London_data = data.loc[relevant_rows]
+    # Load the data for London to get dates array
+    london_url = COVID_DATA_API.format(name="London")
+    london_data = pd.read_csv(london_url)
 
     # Find initial and final date for london
-    date_array = London_data['Specimen date']
+    date_array = london_data['SpecimenDate']
     start_date = date_array.min()
     end_date = date_array.max()
 
@@ -46,20 +39,28 @@ def update_borough_database():
 
     d.save()
 
+    ## Boroughs' cases and deaths
+
     # Save the cumulative data into the database
+    borough_names = POPULATIONS_DIC.keys()
+
     for area in borough_names:
+        
+        borough_url = COVID_DATA_API.format(name=area)
+        borough_url = borough_url.replace(' ','%20') # In case there are spaces in the borough name
+        borough_data = pd.read_csv(borough_url)
 
-        # Get the data for the relevant borough
-        relevant_rows = data['Area name'] == area
-        borough_data = data.loc[relevant_rows]
-
-        # If there are duplicate rows, remove them
+        # Latest number of deaths
+        list_deaths = np.array(london_data['DailyDeaths'])
+        deaths_number = int(np.nanmax(list_deaths))
+        
+        # Drop duplicates, if there are any
         borough_data = borough_data.drop_duplicates()
 
         # Get the increment of cases (now padded with 0's where no cases were reported)
-        borough_data.index = pd.DatetimeIndex(borough_data['Specimen date'])
+        borough_data.index = pd.DatetimeIndex(borough_data['SpecimenDate'])
         borough_data_pad = borough_data.reindex(idx,fill_value=0)
-        increments = np.array(borough_data_pad['Daily lab-confirmed cases'])
+        increments = np.array(borough_data_pad['DailyCases'])
         increments = np.nan_to_num(increments) # Replace nan entries with zero
 
         # Compute the cumulative number of cases out of the increment array
@@ -68,9 +69,10 @@ def update_borough_database():
         try:
             b = Borough.objects.get(name__exact=area)
             b.cumulative_array = cases
+            b.latest_deaths = deaths_number
         except Borough.DoesNotExist:
             pop = POPULATIONS_DIC[area]
-            b = Borough(name=area,population=pop, cumulative_array=cases)
+            b = Borough(name=area,population=pop,cumulative_array=cases,latest_deaths=deaths_number)
 
         b.save()
 

@@ -19,6 +19,8 @@ class RegionalArea(models.Model):
 # Model for saving cumulative cases of London's boroughs
 class Borough(RegionalArea):
 
+	latest_deaths = models.IntegerField(default=0)
+
 	class Meta(RegionalArea.Meta):
 		db_table = 'London_boroughs'
 
