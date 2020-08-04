@@ -1,0 +1,62 @@
+{% load static %}
+<link rel="stylesheet" type="text/css" href="{% static 'plots/style.css' %}">
+
+<!DOCTYPE html>
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet" />
+</head>
+<body>
+  <div class="container-fluid">
+    <h2>Covid trends in London boroughs</h2>
+    <p>
+      This page shows how the differen boroughs perform in terms of
+      total cases of Covid-19 and their weekly increments.
+      The data are collected from the governmental website 
+      <a href="https://coronavirus.data.gov.uk">https://coronavirus.data.gov.uk</a>.
+      The data are updated to <b>{{ date }}</b>.
+    </p>
+    <div class="dropdown">
+      <button class="dropbtn">{{ current }}</button>
+        <div class="dropdown-content">
+          {% for entry in items %}
+              <a href="{% url 'plots:trends' entry %}">{{ entry }}</a>
+          {% endfor %}
+        </div>
+    </div>
+    <div id="image">
+    	<img src="data:image/png;base64,{{ data }}" alt="">
+    </div>
+    <p>
+      <b>NOTE:</b>
+        <ol>
+        <li>
+          The x-axis is the total number of Covid-19 cases registered to date per {{ rel_num }} people.
+          The y-axis is the increment of Covid-19 cases registered during the last 7 days
+          per {{ rel_num }} people.
+        </li>
+        <li>
+          Each point is a different London borough (grey points). The boroughs with both the highest number of cases and the highest weekly increments are highlighted in red; those with high cases and low increments (or viceversa) are shown in orange. The boroughs with the lowest number of cases and the lowest weekly increments are highlighted in green. 
+        </li>
+        <li>
+          The black point in between the dashed line represents the average between boroughs (i.e., London). The borough of interest (the one requested via the button) is highlighted with a blue cross.
+        </li>
+      </ol>
+    </p>
+    <p align="right">
+      <a href="{% url 'plots:cumulative_single' 'London' %}">Absolute cumulative cases</a> &#x21E8;
+    </p>
+    <p align="right">
+      <a href="{% url 'plots:cumulative_multiple' %}">Relative cumulative cases</a> &#x21E8;
+    </p>
+    <hr>
+    <p id="footnote">
+      This project was made using Django, and the source code can be found on
+      <a href="https://github.com/carlosparaciari/Covid19London">GitHub</a>.
+      <span style="float:right;" >
+        <a href="{% url 'plots:cumulative_italy' 'Milano' %}">&#x1f1ee;&#x1f1f9;</a>
+      </span>
+    </p>
+  </div>
+</body>

@@ -1,9 +1,196 @@
 # Library for plot tasks and views
 
 import matplotlib.pyplot as plt
+import io
+import urllib
+import base64
 import numpy as np
 
+from django.http import Http404
+from django.shortcuts import get_object_or_404
+
 from math import ceil
+from datetime import datetime
+
+from .forms import DailyCasesForm
+
+# This function prepare the context for the trend plots (for both London and Italy)
+def regions_trends(request,model_date,model_region,regional_name,pop_rel=1e5):
+
+    # Get last date of update
+    d = model_date.objects.get()
+    last_update = d.get_single_date_str(-1,'%d %B')
+
+    # Make the dropdown menu
+    full_list = [entry for entry in model_region.objects.values_list('name', flat=True)]
+
+    try:
+        full_list.remove('London')
+        sort_list = np.sort(full_list)
+        menu_items = np.append(sort_list,'London')
+    except ValueError:
+        menu_items = np.sort(full_list)
+
+    # Check that regional_name belongs to list
+    if not np.isin(regional_name,menu_items):
+        raise Http404("Region name does not exists")
+
+    # Collect total number of cases and weekly increases per regional area
+    data_points = {}
+    pop_list = []
+
+    for area in menu_items:
+        b = model_region.objects.get(name__exact=area)
+
+        latest_cases = b.get_single_entry(-1)
+        week_old_cases = b.get_single_entry(-7)
+
+        week_increment = latest_cases - week_old_cases
+
+        pop = b.population
+        pop_list.append(pop)
+
+        data_points[area] = (pop_rel*latest_cases/pop, pop_rel*week_increment/pop)
+
+    all_data = np.array([[*entry] for entry in data_points.values()]).T
+    cases_list, incr_list = all_data
+
+    # Average value of cases and increses over regional areas
+    pop_array = np.array(pop_list)
+
+    average_data = np.sum(all_data*pop_array,axis=1)/np.sum(pop_array)
+    average_cases, average_incr = average_data
+
+    # Select extreme regions to highligh in the plot
+    high_cases = cases_list > average_cases
+    high_incr = incr_list > average_incr
+
+    point_list = np.array(list(data_points.items()))
+    delta_cases = max(cases_list) - min(cases_list)
+    delta_incr = max(incr_list) - min(incr_list)
+
+    # North-East quadrant (high cases and high increase)
+    quadrant_NE = np.logical_and(high_cases,high_incr)
+    measure_NE = lambda x,y : x/delta_cases + y/delta_incr
+
+    values_NE = extremal_regions(point_list[quadrant_NE],measure_NE)
+
+    # South-East quadrant (high cases and low increase)
+    quadrant_SE = np.logical_and(high_cases,~high_incr)
+    measure_SE = lambda x,y : x/delta_cases - y/delta_incr
+
+    values_SE = extremal_regions(point_list[quadrant_SE],measure_SE)
+
+    # South-West quadrant (low cases and low increase)
+    quadrant_SW = np.logical_and(~high_cases,~high_incr)
+    measure_SW = lambda x,y : - x/delta_cases - y/delta_incr
+
+    values_SW = extremal_regions(point_list[quadrant_SW],measure_SW,n=1)
+
+    # North-West quadrant (low cases and high increase)
+    quadrant_NW = np.logical_and(~high_cases,high_incr)
+    measure_NW = lambda x,y : - x/delta_cases + y/delta_incr
+
+    values_NW = extremal_regions(point_list[quadrant_NW],measure_NW)
+
+    # Plot the regional trends in a scatter plot
+    highlights = (values_NE,values_SE,values_SW,values_NW)
+    regional_data = data_points[regional_name]
+
+    plot_trend = plot_trends(regional_data,all_data,average_data,highlights)
+
+    # Save plot into buffer and convert to be able to visualise it
+    buf = io.BytesIO()
+    plot_trend.savefig(buf,format='png')
+    buf.seek(0)
+    string = base64.b64encode(buf.read())
+    uri = urllib.parse.quote(string)
+
+    # Data to pass to the html page
+    context = {}
+    context['data']=uri
+    context['items']=menu_items
+    context['current']=regional_name
+    context['date']=last_update
+    context['rel_num']=int(pop_rel)
+
+    return context
+
+
+# This function prepare the context for the absolute plots (for both London and Italy)
+def cumulative_cases(request,model_date,model_region,regional_name):
+
+    # Get dates array from database and last date of update
+    d = model_date.objects.get()
+    dates_array = d.get_dates('%d %b')
+    last_update = d.get_single_date_str(-1,'%d %B')
+
+    # Set the date the user is interested in (default is latest day)
+    date_val = d.get_single_date(-1)
+
+    # If the user has provided a date
+    if request.method == 'GET' and 'date' in request.GET:
+        response = request.GET
+        response_date = response.get('date')
+
+        try:
+            date_object = datetime.strptime(response_date, '%Y-%m-%d')
+        except ValueError:
+            pass
+        else:
+            date_requested = date_object.strftime('%d %b')
+            if date_requested in dates_array:
+                date_val = date_object
+
+    date_val_str = date_val.strftime('%d %b')
+
+    # Make the dropdown menu
+    full_list = [entry for entry in model_region.objects.values_list('name', flat=True)]
+
+    try:
+        full_list.remove('London')
+        sort_list = np.sort(full_list)
+        menu_items = np.append(sort_list,'London')
+    except ValueError:
+        menu_items = np.sort(full_list)
+
+    # Get relevant region and dates
+    b = get_object_or_404(model_region, name__exact=regional_name)
+
+    # Get the cumulative array and the daily increments for the borough
+    b_cumulative_array = np.array(b.cumulative_array)
+    b_increments = increments(b_cumulative_array)
+
+    # Find cases for date requested
+    date_index = dates_array==date_val_str
+
+    # Daily information
+    daily_total = b_cumulative_array[date_index][0]
+    daily_increment = b_increments[date_index][0]
+    daily_percentage = "{:.1f}".format(100*daily_increment/(daily_total-daily_increment))
+
+    # Plot of cumulative cases
+    cumul_abs = cumulative_plot_abs(dates_array, b_cumulative_array, b_increments, b.name)
+
+    # Save plot into buffer and convert to be able to visualise it
+    buf = io.BytesIO()
+    cumul_abs.savefig(buf,format='png')
+    buf.seek(0)
+    string = base64.b64encode(buf.read())
+    uri = urllib.parse.quote(string)
+
+    # Data to pass to the html page
+    context = {}
+    context['data']=uri
+    context['items']=menu_items
+    context['current']=b.name
+    context['date']=last_update
+    context['date_form']=DailyCasesForm(initial={'date': date_val}) 
+    context['daily_tot']=daily_total
+    context['daily_inc']=daily_increment
+    context['daily_per']=daily_percentage
+
+    return context
 
 # Provide the daily increments from the array of cumulative cases
 def increments(cases_array):
@@ -54,6 +241,72 @@ def simple_moving_average(array,period=7.):
         sma.append( np.mean(array[initial:final]) )
 
     return np.array(sma)
+
+# Identify the n region with higher value of the given order measure
+def extremal_regions(point_list,order_measure,n=2):
+    
+    # In case the passed object is not a list
+    point_list = list(point_list)
+    
+    # Order the points with the order measure, and take the first n of them
+    point_list.sort(reverse=True,key = lambda tup : order_measure(*tup[1]))
+    extremal_points = point_list[:n]
+    
+    # Record the name of the regions, the number of cases and the weekly increase
+    areas_list = np.array([area for area,_ in extremal_points])
+    cases_list, incr_list = np.array([[*point] for _,point in extremal_points]).T
+    
+    return areas_list, cases_list, incr_list
+
+# Plot each regional area as a point  on a 2D plot with
+# x-axis : the total number of cases reported to date
+# y-axis : the increse in the number of cases reported during the week
+def plot_trends(region_data,all_data,average_data,highlights):
+    
+    # Unpacking data
+    cases_list, incr_list = all_data
+    average_cases, average_incr = average_data
+
+    fig = plt.figure()
+    
+    # Plot all region for reference
+    plt.scatter(*all_data, c='lightgray',marker='.')
+
+    # Divide the plot between high and low increments (compared to average)
+    xmax = max(cases_list)
+    xmin = min(cases_list)
+    plt.hlines(average_incr, xmin, xmax, linestyles='--',linewidth=.6)
+
+    # Divide the plot between high and low cases (compared to average)
+    ymax = max(incr_list)
+    ymin = min(incr_list)
+    plt.vlines(average_cases, ymin, ymax, linestyles='--',linewidth=.6)
+
+    # Plot the average point
+    plt.scatter([average_cases], [average_incr], c='black',marker='.')
+
+    # Plot the highlighted regions in the different quadrants
+    colours = ('red','orange','green','orange')
+    
+    for val, col in zip(highlights,colours):
+        plt.scatter(val[1], val[2], c=col,marker='.')
+    
+    # Annotate the highlighted points with the corresponding regional name
+    for areas, cases, incrs in highlights:
+        for text, x, y in zip(areas, cases, incrs):
+            plt.annotate(text, (x,y))        
+    
+    # Highlight the region of interest
+    plt.scatter(*region_data,marker="X")
+    
+    plt.box(on=None)
+    
+    plt.xlabel('Total number of cases')
+    plt.ylabel('Weekly increase in cases')
+    
+    plt.close()
+    
+    return fig
 
 # Plot of cumulative cases plus increments
 def cumulative_plot_abs(dates_str,cases,increment,area):
@@ -114,7 +367,6 @@ def cumulative_plot_rel(dates_str,cases_rel_list,area_list,col_list,pop_rel=1e5)
     for perc,col,str_perc in line_parameters:
         plt.semilogy(dates_str,line_rel_growth(perc,data_size),'--',color=col,linewidth=0.75,label=str_perc+' daily increase')
     
-    plt.title('Density cumulative cases in London boroughs')
     plt.xlabel('Days since 1st relative case')
     plt.ylabel('Cases per '+str(int(pop_rel))+' people (log scale)')
     

@@ -1,4 +1,4 @@
-from django.http import HttpResponseRedirect, HttpResponse
+from django.http import HttpResponseRedirect, HttpResponse, Http404
 from django.shortcuts import render, get_object_or_404
 from django.urls import reverse
 
@@ -9,97 +9,31 @@ import numpy as np
 from datetime import datetime
 import matplotlib._color_data as mcd
 
-from .plots_lib import increments, relative_cases_array, cumulative_plot_abs, cumulative_plot_rel, prepare_checklist_boroughs
+from .plots_lib import increments, relative_cases_array, regions_trends, cumulative_cases, cumulative_plot_abs, cumulative_plot_rel, prepare_checklist_boroughs
 from .models import Borough, Province, LondonDate, ItalyDate
-from .forms import DailyCasesForm
 
 def index(request):
 	return HttpResponseRedirect(reverse('plots:cumulative_single', args=('London',)))
-
-# This function prepare the context for the absolute plots (for both London and Italy)
-def cumulative_cases(request,model_date,model_region,regional_name):
-
-	# Get dates array from database and last date of update
-	d = model_date.objects.get()
-	dates_array = d.get_dates('%d %b')
-	last_update = d.get_single_date_str(-1,'%d %B')
-
-	# Set the date the user is interested in (default is latest day)
-	date_val = d.get_single_date(-1)
-
-	# If the user has provided a date
-	if request.method == 'GET' and 'date' in request.GET:
-		response = request.GET
-		response_date = response.get('date')
-
-		try:
-			date_object = datetime.strptime(response_date, '%Y-%m-%d')
-		except ValueError:
-			pass
-		else:
-			date_requested = date_object.strftime('%d %b')
-			if date_requested in dates_array:
-				date_val = date_object
-
-	date_val_str = date_val.strftime('%d %b')
-
-	# Make the dropdown menu
-	full_list = [entry for entry in model_region.objects.values_list('name', flat=True)]
-
-	try:
-		full_list.remove('London')
-		sort_list = np.sort(full_list)
-		menu_items = np.append(sort_list,'London')
-	except ValueError:
-		menu_items = np.sort(full_list)
-
-	# Get relevant borough and dates
-	b = get_object_or_404(model_region, name__exact=regional_name)
-
-	# Get the cumulative array and the daily increments for the borough
-	b_cumulative_array = np.array(b.cumulative_array)
-	b_increments = increments(b_cumulative_array)
-
-	# Find cases for date requested
-	date_index = dates_array==date_val_str
-
-	# Daily information
-	daily_total = b_cumulative_array[date_index][0]
-	daily_increment = b_increments[date_index][0]
-	daily_percentage = "{:.1f}".format(100*daily_increment/(daily_total-daily_increment))
-
-	# Plot of cumulative cases
-	cumul_abs = cumulative_plot_abs(dates_array, b_cumulative_array, b_increments, b.name)
-
-	# Save plot into buffer and convert to be able to visualise it
-	buf = io.BytesIO()
-	cumul_abs.savefig(buf,format='png')
-	buf.seek(0)
-	string = base64.b64encode(buf.read())
-	uri = urllib.parse.quote(string)
-
-	# Data to pass to the html page
-	context = {}
-	context['data']=uri
-	context['items']=menu_items
-	context['current']=b.name
-	context['date']=last_update
-	context['date_form']=DailyCasesForm(initial={'date': date_val}) 
-	context['daily_tot']=daily_total
-	context['daily_inc']=daily_increment
-	context['daily_per']=daily_percentage
-
-	return context
 
 def cumul_abs(request,borough_name):
 
 	context = cumulative_cases(request,LondonDate,Borough,borough_name)
 	return render(request, 'plots/cumulative_abs.html', context)
 
+def trends(request,borough_name):
+
+	context = regions_trends(request,LondonDate,Borough,borough_name)
+	return render(request, 'plots/trends.html', context)
+
 def cumul_ita(request,province_name):
 
 	context = cumulative_cases(request,ItalyDate,Province,province_name)
 	return render(request, 'plots/cumulative_italy.html', context)
+
+def trends_ita(request,province_name):
+
+	context = regions_trends(request,ItalyDate,Province,province_name)
+	return render(request, 'plots/trends_italy.html', context)
 
 def cumul_rel(request):
 

@@ -13,6 +13,14 @@ class RegionalArea(models.Model):
 	def __str__(self):
 		return self.name
 
+	def get_single_entry(self,index):
+		size_array = len(self.cumulative_array)
+
+		if (index >= size_array) or (index <= -size_array-1):
+			raise IndexError
+
+		return self.cumulative_array[index]
+
 	class Meta:
 		abstract = True
 

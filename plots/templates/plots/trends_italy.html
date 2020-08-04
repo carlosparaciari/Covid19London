@@ -9,9 +9,10 @@
 </head>
 <body>
   <div class="container-fluid">
-    <h2>Cumulative cases in Italy's provinces</h2>
+    <h2>Covid trends in Italian provinces</h2>
     <p>
-      This page shows the cumulative cases of Covid-19 in different Italian provinces.
+      This page shows how the differen provinces perform in terms of
+      total cases of Covid-19 and their weekly increments.
       The data are collected from the Protezione Civile Italina 
       (<a href="https://github.com/pcm-dpc/COVID-19">link</a>).
       The data are updated to <b>{{ date }}</b>.
@@ -21,43 +22,31 @@
       <div id="src_dropdown" class="dropdown-content">
         <input type="text" placeholder=" Select province..." id="src_input" onkeyup="filter_search()">
         {% for entry in items %}
-            <a href="{% url 'plots:cumulative_italy' entry %}">{{ entry }}</a>
+            <a href="{% url 'plots:trends_italy' entry %}">{{ entry }}</a>
         {% endfor %}
       </div>
     </div>
     <div id="image">
     	<img src="data:image/png;base64,{{ data }}" alt="">
     </div>
-    <div align="center" id="daily">
-      <form method = "GET">
-        {{ date_form }} 
-        <input type = "submit" value = "Show cases"> 
-      </form>
-      <p>
-        <b>Total cases to date:</b> {{ daily_tot }} &emsp;
-        <b>Daily increase:</b> {{ daily_inc }} &emsp;
-        <b>Percentual increase:</b> {{ daily_per }}&#37;
-      </p>
-      <p>{{ test }}</p>
-    </div>
     <p>
       <b>NOTE:</b>
         <ol>
         <li>
-          The blue line represents the cumulative number of Covid-19 cases recorded in the province. The values taken by this line are shown on the left y-axis.
+          The x-axis is the total number of Covid-19 cases registered to date per {{ rel_num }} people.
+          The y-axis is the increment of Covid-19 cases registered during the last 7 days
+          per {{ rel_num }} people.
         </li>
         <li>
-          The green bars are the daily cases recorded. The value of these bars can be read on the
-          right y-axis.
+          Each point is a different Italian province (grey points). The provinces with both the highest number of cases and the highest weekly increments are highlighted in red; those with high cases and low increments (or viceversa) are shown in orange. The provinces with the lowest number of cases and the lowest weekly increments are highlighted in green. 
         </li>
         <li>
-          The red line is the moving average of daily cases with a 7-day period, to remove
-          fluctuations due to delays during the weekends.
+          The black point in between the dashed line represents the average between provinces (i.e., Italy). The province of interest (the one requested via the button) is highlighted with a blue cross.
         </li>
       </ol>
     </p>
     <p align="right">
-      <a href="{% url 'plots:trends_italy' 'Milano' %}">Compare Italian provinces</a> &#x21E8;
+      <a href="{% url 'plots:cumulative_italy' 'Milano' %}">Absolute cumulative cases</a> &#x21E8;
     </p>
     <hr>
     <p id="footnote">
