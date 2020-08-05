@@ -76,6 +76,10 @@ img {
   border-bottom: 1px solid #ddd;
 }
 
+.nobr {
+  white-space:nowrap;
+}
+
 .dropbtn {
   background-color: #1f77b4;
   color: white;
@@ -83,6 +87,7 @@ img {
   padding: 10px;
   font-size: 16px;
   border: none;
+  margin-bottom:15px;
 }
 
 .dropdown {
