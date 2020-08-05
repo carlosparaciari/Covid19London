@@ -28,6 +28,12 @@
     <div id="image">
     	<img src="data:image/png;base64,{{ data }}" alt="">
     </div>
+    <div align="center" id="daily">
+      <p>
+        <b>Total cases to date:</b> {{ tot_cases }} per {{ rel_num }} people &emsp;
+        <b>Weekly increase:</b> {{ weekly_inc }} per {{ rel_num }} people
+      </p>
+    </div>
     <p>
       <b>NOTE:</b>
         <ol>

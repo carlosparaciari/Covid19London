@@ -113,9 +113,10 @@ def regions_trends(request,model_date,model_region,regional_name,pop_rel=1e5):
     context['current']=regional_name
     context['date']=last_update
     context['rel_num']='{:,}'.format(int(pop_rel))
+    context['tot_cases']="{:.1f}".format(regional_data[0])
+    context['weekly_inc']="{:.1f}".format(regional_data[1])
 
     return context
-
 
 # This function prepare the context for the absolute plots (for both London and Italy)
 def cumulative_cases(request,model_date,model_region,regional_name):
@@ -267,10 +268,10 @@ def plot_trends(region_data,all_data,average_data,highlights):
     cases_list, incr_list = all_data
     average_cases, average_incr = average_data
 
-    fig = plt.figure()
-
     plt.rc('xtick',labelsize=12)
     plt.rc('ytick',labelsize=12)
+
+    fig = plt.figure()
     
     # Plot all region for reference
     plt.scatter(*all_data, c='lightgray',marker='.')
@@ -316,10 +317,10 @@ def plot_trends(region_data,all_data,average_data,highlights):
 # Plot of cumulative cases plus increments
 def cumulative_plot_abs(dates_str,cases,increment,area):
     
-    fig, ax1 = plt.subplots()
-
     plt.rc('xtick',labelsize=12)
     plt.rc('ytick',labelsize=12)
+
+    fig, ax1 = plt.subplots()
 
     ax1.set_zorder(2)
     ax1.patch.set_visible(False)
@@ -354,10 +355,10 @@ def cumulative_plot_abs(dates_str,cases,increment,area):
 # Plot of relative cases for different boroughs
 def cumulative_plot_rel(dates_str,cases_rel_list,area_list,col_list,pop_rel=1e5):
 
-    fig = plt.figure()
-
     plt.rc('xtick',labelsize=12)
     plt.rc('ytick',labelsize=12)
+
+    fig = plt.figure()
 
     # Divide in boroughs data and London data (London is always passed as last element in list)
     borough_list = cases_rel_list[:-1]
