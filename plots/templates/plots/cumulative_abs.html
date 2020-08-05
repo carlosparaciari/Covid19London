@@ -24,6 +24,13 @@
     			{% endfor %}
     		</div>
     </div>
+    <div align="center" id="daily">
+      <p>
+        <b>Total cases:</b> {{ tot_cases }} &emsp;
+        <b>Total deaths:</b> {{ tot_deaths }} &emsp;
+        <b>Mortality rate:</b> {{ mortality }}&#37;
+      </p>
+    </div>
     <div id="image">
     	<img src="data:image/png;base64,{{ data }}" alt="">
     </div>

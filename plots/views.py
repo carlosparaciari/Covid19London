@@ -12,6 +12,14 @@ def index(request):
 
 def cumul_abs(request,borough_name):
 	context = cumulative_cases(request,LondonDate,Borough,borough_name)
+
+	# London boroughs have information on the total deaths to date
+	b = Borough.objects.get(name__exact=borough_name)
+	
+	context['tot_deaths']=b.latest_deaths
+	context['tot_cases']=b.get_single_entry(-1)
+	context['mortality']="{:.1f}".format(100*context['tot_deaths']/context['tot_cases'])
+
 	return render(request, 'plots/cumulative_abs.html', context)
 
 def cumul_rel(request):
