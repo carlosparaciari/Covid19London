@@ -51,7 +51,7 @@ def update_borough_database():
         borough_data = pd.read_csv(borough_url)
 
         # Latest number of deaths
-        list_deaths = np.array(london_data['DailyDeaths'])
+        list_deaths = np.array(borough_data['DailyDeaths'])
         deaths_number = int(np.nanmax(list_deaths))
         
         # Drop duplicates, if there are any
