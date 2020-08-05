@@ -9,7 +9,7 @@
 </head>
 <body>
   <div class="container-fluid">
-    <h2>Covid trends in Italian provinces</h2>
+    <h2>Covid-19 trends in Italian provinces</h2>
     <p>
       This page shows how the differen provinces perform in terms of
       total cases of Covid-19 and their weekly increments.
@@ -33,12 +33,15 @@
       <b>NOTE:</b>
         <ol>
         <li>
-          The x-axis is the total number of Covid-19 cases registered to date per {{ rel_num }} people.
-          The y-axis is the increment of Covid-19 cases registered during the last 7 days
-          per {{ rel_num }} people.
+          On the x-axis we show the total number of Covid-19 cases registered to
+          date per {{ rel_num }} people. On the y-axis we show the increment of
+          cases registered during the last 7 days per {{ rel_num }} people.
         </li>
         <li>
-          Each point is a different Italian province (grey points). The provinces with both the highest number of cases and the highest weekly increments are highlighted in red; those with high cases and low increments (or viceversa) are shown in orange. The provinces with the lowest number of cases and the lowest weekly increments are highlighted in green. 
+          To normalise the cases we have used the latest population estimates (2020) released by the <a href="http://dati.istat.it/Index.aspx?DataSetCode=DCIS_POPRES1">Istituto nazionale di statistica</a>.
+        </li>
+        <li>
+          Each grey point represents a different Italian province. The provinces with both the highest number of cases and the highest weekly increment are highlighted in red; those with high cases and low increments (or viceversa) are shown in orange. The provinces with the lowest number of cases and the lowest weekly increment are highlighted in green. 
         </li>
         <li>
           The black point in between the dashed line represents the average between provinces (i.e., Italy). The province of interest (the one requested via the button) is highlighted with a blue cross.
