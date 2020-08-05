@@ -112,7 +112,7 @@ def regions_trends(request,model_date,model_region,regional_name,pop_rel=1e5):
     context['items']=menu_items
     context['current']=regional_name
     context['date']=last_update
-    context['rel_num']=int(pop_rel)
+    context['rel_num']='{:,}'.format(int(pop_rel))
 
     return context
 
@@ -268,6 +268,9 @@ def plot_trends(region_data,all_data,average_data,highlights):
     average_cases, average_incr = average_data
 
     fig = plt.figure()
+
+    plt.rc('xtick',labelsize=12)
+    plt.rc('ytick',labelsize=12)
     
     # Plot all region for reference
     plt.scatter(*all_data, c='lightgray',marker='.')
@@ -292,17 +295,19 @@ def plot_trends(region_data,all_data,average_data,highlights):
         plt.scatter(val[1], val[2], c=col,marker='.')
     
     # Annotate the highlighted points with the corresponding regional name
+    delta_y = 0.01*(ymax-ymin)
+
     for areas, cases, incrs in highlights:
         for text, x, y in zip(areas, cases, incrs):
-            plt.annotate(text, (x,y))        
+            plt.annotate(text, (x,y+delta_y),size=14)        
     
     # Highlight the region of interest
-    plt.scatter(*region_data,marker="X")
+    plt.scatter(*region_data,marker="X",zorder=10)
     
     plt.box(on=None)
     
-    plt.xlabel('Total number of cases')
-    plt.ylabel('Weekly increase in cases')
+    plt.xlabel('Total number of cases',size=14)
+    plt.ylabel('Weekly increase in cases',size=14)
     
     plt.close()
     
@@ -313,12 +318,15 @@ def cumulative_plot_abs(dates_str,cases,increment,area):
     
     fig, ax1 = plt.subplots()
 
+    plt.rc('xtick',labelsize=12)
+    plt.rc('ytick',labelsize=12)
+
     ax1.set_zorder(2)
     ax1.patch.set_visible(False)
     
     ax1.plot(dates_str,cases,linewidth=2) # Cumulative cases in time
-    ax1.set_xlabel('Days')
-    ax1.set_ylabel('Cases')
+    ax1.set_xlabel('Days',size=14)
+    ax1.set_ylabel('Cases',size=14)
     ax1.set_ylim(bottom=0)
 
     ax2 = ax1.twinx()
@@ -328,8 +336,8 @@ def cumulative_plot_abs(dates_str,cases,increment,area):
     
     pltbar = ax2.bar(dates_str,increment,width=1.,color='darkseagreen') # Increment in bar
     ax2.plot(dates_str,increment_sma,linewidth=1,color='r')
-    ax2.set_ylabel('Daily increments')
-    ax2.set_xticks(tick_dates(dates_str))
+    ax2.set_ylabel('Daily increments',size=14)
+    ax2.set_xticks(tick_dates(dates_str,number_shown=7))
     
     max_increment = max(increment)
     ax2.set_ylim(top=3*max_increment)
@@ -347,6 +355,9 @@ def cumulative_plot_abs(dates_str,cases,increment,area):
 def cumulative_plot_rel(dates_str,cases_rel_list,area_list,col_list,pop_rel=1e5):
 
     fig = plt.figure()
+
+    plt.rc('xtick',labelsize=12)
+    plt.rc('ytick',labelsize=12)
 
     # Divide in boroughs data and London data (London is always passed as last element in list)
     borough_list = cases_rel_list[:-1]
@@ -367,8 +378,8 @@ def cumulative_plot_rel(dates_str,cases_rel_list,area_list,col_list,pop_rel=1e5)
     for perc,col,str_perc in line_parameters:
         plt.semilogy(dates_str,line_rel_growth(perc,data_size),'--',color=col,linewidth=0.75,label=str_perc+' daily increase')
     
-    plt.xlabel('Days since 1st relative case')
-    plt.ylabel('Cases per '+str(int(pop_rel))+' people (log scale)')
+    plt.xlabel('Days since 1st relative case',size=14)
+    plt.ylabel('Cases per '+'{:,}'.format(int(pop_rel))+' people (log scale)',size=14)
     
     # Maximum value for the y-axis
     max_cases = max([np.max(cases_rel[np.isfinite(cases_rel)]) for cases_rel in cases_rel_list])
