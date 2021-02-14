@@ -386,7 +386,7 @@ def cumulative_plot_abs(dates_str,cases,increment,area):
     pltbar = ax2.bar(dates_str,increment,width=1.,color='darkseagreen') # Increment in bar
     ax2.plot(dates_str,increment_sma,linewidth=1,color='r')
     ax2.set_ylabel('Daily increments',size=14)
-    ax2.set_xticks(tick_dates(dates_str,number_shown=7))
+    ax2.set_xticks(tick_dates(dates_str,number_shown=4))
     
     max_increment = max(increment)
     ax2.set_ylim(top=3*max_increment)

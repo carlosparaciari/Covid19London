@@ -16,6 +16,6 @@ class SimpleMovingAverageTest(TestCase):
 		self.assertRaises(ValueError, simple_moving_average, self.test_array, period=self.wrong_period)
 
 	def test_working_example(self):
-		obt_array = simple_moving_average(self.test_array, period=self.test_period)
+		obt_array = simple_moving_average(self.test_array, period=self.test_period,stopping=0)
 		np.testing.assert_array_equal(obt_array, self.exp_array,
 									  err_msg='simple_moving_average does not work as expected')
