@@ -322,9 +322,11 @@ def simple_moving_average(array,period=7.,stopping=5):
         sma.append( np.mean(array[initial:final]) )
 
     sma = np.array(sma)
-    sma[-stopping:] = np.full(stopping,None)
 
-    return np.array(sma)
+    if stopping != 0:
+        sma[-stopping:] = np.full(stopping,None)
+
+    return sma
 
 # Identify the n region with higher value of the given order measure
 def extremal_regions(point_list,order_measure,n=2):
