@@ -322,7 +322,7 @@ def simple_moving_average(array,period=7.,stopping=5):
         sma.append( np.mean(array[initial:final]) )
 
     sma = np.array(sma)
-    sma[-5:] = np.full(5,None)
+    sma[-stopping:] = np.full(stopping,None)
 
     return np.array(sma)
 
