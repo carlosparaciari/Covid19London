@@ -382,6 +382,9 @@ def cumulative_plot_abs(dates_str,cases,increment,area):
     ax2.set_zorder(1)
 
     increment_sma = simple_moving_average(increment)
+
+    # Remove negative increments (italian data have some)
+    increment[increment < 0] = 0
     
     pltbar = ax2.bar(dates_str,increment,width=1.,color='darkseagreen') # Increment in bar
     ax2.plot(dates_str,increment_sma,linewidth=1,color='r')
