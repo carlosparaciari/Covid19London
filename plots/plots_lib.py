@@ -22,7 +22,7 @@ def cumulative_cases(request,model_date,model_region,regional_name):
 
     # Get dates array from database and last date of update
     d = model_date.objects.get()
-    dates_array = d.get_dates('%d %b')
+    dates_array = d.get_dates('%d %b %y')
     last_update = d.get_single_date_str(-1,'%d %B')
 
     # Set the date the user is interested in (default is latest day)
@@ -38,11 +38,11 @@ def cumulative_cases(request,model_date,model_region,regional_name):
         except ValueError:
             pass
         else:
-            date_requested = date_object.strftime('%d %b')
+            date_requested = date_object.strftime('%d %b %y')
             if date_requested in dates_array:
                 date_val = date_object
 
-    date_val_str = date_val.strftime('%d %b')
+    date_val_str = date_val.strftime('%d %b %y')
 
     # Make the dropdown menu
     full_list = [entry for entry in model_region.objects.values_list('name', flat=True)]
@@ -305,7 +305,7 @@ def line_rel_growth(perc,size):
     return line
 
 # Simple moving average for data array
-def simple_moving_average(array,period=7.):
+def simple_moving_average(array,period=7.,stopping=5):
     
     if period%2 == 0:
         raise ValueError("period variable should be odd")
@@ -320,6 +320,9 @@ def simple_moving_average(array,period=7.):
         final = min(size,n+half_period+1)
 
         sma.append( np.mean(array[initial:final]) )
+
+    sma = np.array(sma)
+    sma[-5:] = np.full(5,None)
 
     return np.array(sma)
 
