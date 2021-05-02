@@ -17,7 +17,7 @@ def update_borough_database():
     ## Dates table
 
     # Load the data for London to get dates array
-    london_url = COVID_DATA_API.format(name="London")
+    london_url = COVID_DATA_API.format(area_type="region",name="London")
     london_data = pd.read_csv(london_url)
 
     # Find initial and final date for london
@@ -46,7 +46,7 @@ def update_borough_database():
 
     for area in borough_names:
         
-        borough_url = COVID_DATA_API.format(name=area)
+        borough_url = COVID_DATA_API.format(area_type="utla",name=area)
         borough_url = borough_url.replace(' ','%20') # In case there are spaces in the borough name
         borough_data = pd.read_csv(borough_url)
 

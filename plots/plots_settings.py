@@ -3,7 +3,7 @@
 # For London boroughs
 
 COVID_DATA_API = ('https://api.coronavirus.data.gov.uk/v1/data?'
-                  'filters=areaName={name}&'
+                  'filters=areaType={area_type};areaName={name}&'
                   'structure={{"SpecimenDate":"date","DailyCases":"newCasesBySpecimenDate","DailyDeaths":"cumDeaths28DaysByDeathDate"}}&'
                   'format=csv'
                  )
