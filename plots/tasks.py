@@ -18,26 +18,30 @@ def update_borough_database():
 
     # Load the data for London to get dates array
     london_url = COVID_DATA_API.format(area_type="region",name="London")
-    london_data = pd.read_csv(london_url)
-
-    # Find initial and final date for london
-    date_array = london_data['SpecimenDate']
-    start_date = date_array.min()
-    end_date = date_array.max()
-
-    # Create a pad for the dates
-    idx = pd.date_range(start_date, end_date)
-
-    # Save the dates into the database
-    dates_str = list(idx.strftime("%d-%b-%Y"))
 
     try:
-        d = LondonDate.objects.get()
-        d.dates_array = dates_str
-    except LondonDate.DoesNotExist:
-        d = LondonDate(dates_array=dates_str)
+        london_data = pd.read_csv(london_url)
+    except pd.errors.EmptyDataError:
+        print('London dates returned an empty csv.')
+    else:
+        # Find initial and final date for london
+        date_array = london_data['SpecimenDate']
+        start_date = date_array.min()
+        end_date = date_array.max()
 
-    d.save()
+        # Create a pad for the dates
+        idx = pd.date_range(start_date, end_date)
+
+        # Save the dates into the database
+        dates_str = list(idx.strftime("%d-%b-%Y"))
+
+        try:
+            d = LondonDate.objects.get()
+            d.dates_array = dates_str
+        except LondonDate.DoesNotExist:
+            d = LondonDate(dates_array=dates_str)
+
+        d.save()
 
     ## Boroughs' cases and deaths
 
@@ -45,10 +49,19 @@ def update_borough_database():
     borough_names = POPULATIONS_DIC.keys()
 
     for area in borough_names:
-        
-        borough_url = COVID_DATA_API.format(area_type="utla",name=area)
+
+        if area == 'London':
+            borough_url = COVID_DATA_API.format(area_type="region",name=area)
+        else:
+            borough_url = COVID_DATA_API.format(area_type="utla",name=area)
+
         borough_url = borough_url.replace(' ','%20') # In case there are spaces in the borough name
-        borough_data = pd.read_csv(borough_url)
+
+        try:
+            borough_data = pd.read_csv(borough_url)
+        except pd.errors.EmptyDataError:
+            print('Borough {} returned an empty csv.'.format(area))
+            continue
 
         # Latest number of deaths
         list_deaths = np.array(borough_data['DailyDeaths'])
