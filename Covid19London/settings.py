@@ -97,7 +97,7 @@ CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
 CELERY_BEAT_SCHEDULE = {
     'check-london_data_every-twelve-hours': {
         'task': 'plots.tasks.update_borough_database',
-        'schedule': 43200 .0,
+        'schedule': 43200.0,
     },
     'check-italy_data_every-twelve-hours': {
         'task': 'plots.tasks.update_province_database',
