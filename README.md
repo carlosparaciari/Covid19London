@@ -1,6 +1,7 @@
 # Covid-19 app for London boroughs and Italian provinces
 
 [![Build Status](https://travis-ci.com/carlosparaciari/Covid19London.svg?branch=master)](https://travis-ci.com/carlosparaciari/Covid19London)
+[![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/carlosparaciari/Covid19London.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/carlosparaciari/Covid19London/context:python)
 
 This app provides up-to-date graphs showing the cumulative cases in the different boroughs of London, as well as Italian provinces. The absolute number of cases is shown for each borough (province) individually, and the infection's numbers (relative to 100,000 people) in different boroughs (provinces) can be compared. Additionally, the trend of cases and weekly increments can be compared between all boroughs (provinces). The app can be found at this [link](https://covid-19-london.herokuapp.com/plots/). Due to restrictions imposed by the server hosting the project ([Heroku](https://www.heroku.com/)), the app might need several seconds before responding when first approached. 
 
